@@ -160,3 +160,12 @@
 - 新增最终对比：`docs/screenshots/models-compare.jpg`（左右为定稿/网页），对应 `models-day.jpg`、`models-night.jpg`。因此上文“没有 GLB”的记录仅表示早先步骤的状态，当前已不适用。
 - `origin` 已添加为用户指定的 GitHub 仓库。执行 `git push -u origin main` 返回 `RPC failed; HTTP 400` / `unexpected disconnect`，未确认任何远程提交成功；Pages 尚未发布。未修改本机全局代理设置。需修复 GitHub 网络/认证后重新推送，不能把预计的 Pages URL 当作已上线地址。
 - `VITE_BASE_PATH=/Hangzhou-3DMap/ npm --prefix app run build` 已通过，生成资源引用包含正确仓库前缀。GLB 加入后产物约 7.7 MB，在 15 MB 首屏预算内。M1/手机实际性能仍待目标设备验收。
+
+### 阶段 7 最终补充：GitHub 连接与公网验收（2026-11-11）
+
+- 使用 HTTP/1.1 和更大的单次上传缓冲后，全部提交成功推送至 `origin/main`，跟踪关系已建立；上文网络失败记录为早先状态，现已解决。
+- 首次 Actions 因未启用 Pages 返回 `Not Found`。已通过 GitHub API 为该仓库启用 `build_type: workflow`，再手动触发发布。运行 https://github.com/mmmax21/Hangzhou-3DMap/actions/runs/43035130457 的 build / deploy 均成功，部署提交为 `54f8375`。
+- 公网地址：https://mmmax21.github.io/Hangzhou-3DMap/ 。已在公网检查场景入场、昼夜切换、雷峰塔 GLB、选择后镜头飞行、卡片与关闭；浏览器控制台无 error，仓库子路径的数据和模型加载正常。
+- 线上验收截图：`docs/screenshots/deployed-day.jpg`、`docs/screenshots/deployed-night.jpg`；新增与定稿并排的 `deployed-compare.jpg`。此前六步并排对比和最终精模对比继续保留。
+- 阶段 6 的六项实现与阶段 7 公网部署已完成。性能限制、低档占位取舍及参考画风差距仍以上文记录为准；未把 M3 Max 结果当成 M1/手机实机验收。
+- 后续修改推送 `main` 即自动发布。当前 Actions 的旧 action runtime 有弃用警告，此次构建与部署均未受影响。

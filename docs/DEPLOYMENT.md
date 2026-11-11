@@ -31,4 +31,12 @@ npm --prefix app run preview -- --host 127.0.0.1 --port 4173
 
 ## 本次状态（2026-11-11）
 
-生产构建已通过，高低画质与手机尺寸已验证。Pages workflow 已配置；需在 GitHub 仓库启用 Pages 的 GitHub Actions 发布方式，并将提交推送到 `main`，才能获得公网地址并验收。
+已连接 `https://github.com/mmmax21/Hangzhou-3DMap.git`，全部实现提交已推送到 `main`，仓库 Pages 已启用为 `workflow` 构建方式。
+
+- 公网地址：https://mmmax21.github.io/Hangzhou-3DMap/
+- 首次成功发布：https://github.com/mmmax21/Hangzhou-3DMap/actions/runs/43035130457 （提交 `54f8375`，build / deploy 均成功）。
+- 已在线检查入场后的场景、昼夜切换、雷峰塔精模、选择飞行与卡片关闭，浏览器控制台无 error；子路径下的数据和模型正常加载。
+- 线上截图：`docs/screenshots/deployed-day.jpg`、`docs/screenshots/deployed-night.jpg`。
+- 高低画质和 390×844 布局已在本地验证；M1 和目标手机的实际帧率仍待设备验收。
+
+首次 workflow 因 Pages 尚未启用而失败，启用后手动触发成功。后续推送 `main` 自动发布，无需再次配置。Actions 目前有 Node 20 action runtime 弃用警告，不影响此次发布；应用构建使用 Node 22。
