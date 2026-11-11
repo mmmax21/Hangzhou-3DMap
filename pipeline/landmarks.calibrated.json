@@ -1,0 +1,82 @@
+[
+  {
+    "id": "duanqiao",
+    "name": "断桥",
+    "lat": 30.260901,
+    "lng": 120.14703,
+    "osm": "way/28538289",
+    "method": "断桥 bridge way 中心"
+  },
+  {
+    "id": "baidi",
+    "name": "白堤",
+    "lat": 30.257454,
+    "lng": 120.144034,
+    "osm": "way/4326974,28538286,28538290,29416781",
+    "method": "白堤 步行道折线中点"
+  },
+  {
+    "id": "sudi",
+    "name": "苏堤",
+    "lat": 30.242122,
+    "lng": 120.134592,
+    "osm": "way/4335991,30072127,30072131,30072138,30072145,30072148,30075393,975869980",
+    "method": "苏堤 步行道折线中点"
+  },
+  {
+    "id": "leifeng",
+    "name": "雷峰塔",
+    "lat": 30.233886,
+    "lng": 120.145015,
+    "osm": "way/229726934",
+    "method": "雷峰塔 building=pagoda 轮廓质心"
+  },
+  {
+    "id": "santan",
+    "name": "三潭印月",
+    "lat": 30.241247,
+    "lng": 120.140675,
+    "osm": "relation/5740510",
+    "method": "小瀛洲 place=island 质心"
+  },
+  {
+    "id": "huxinting",
+    "name": "湖心亭",
+    "lat": 30.248587,
+    "lng": 120.139663,
+    "osm": "way/30086285",
+    "method": "湖心亭 building 轮廓质心"
+  },
+  {
+    "id": "baochu",
+    "name": "保俶塔",
+    "lat": 30.263342,
+    "lng": 120.143375,
+    "osm": "node/5312284654",
+    "method": "保俶塔 man_made=tower 节点"
+  },
+  {
+    "id": "quyuan",
+    "name": "曲院风荷",
+    "lat": 30.253469,
+    "lng": 120.130985,
+    "osm": "node/4685252590",
+    "method": "曲院风荷 tourism=attraction 节点"
+  },
+  {
+    "id": "huagang",
+    "name": "花港观鱼",
+    "lat": 30.234386,
+    "lng": 120.137392,
+    "osm": "node/1881729397",
+    "method": "花港观鱼 tourism=viewpoint 节点"
+  },
+  {
+    "id": "yuewang",
+    "name": "岳王庙",
+    "lat": 30.254678,
+    "lng": 120.129822,
+    "osm": "way/435906176",
+    "method": "岳王庙 tourism=attraction 区域质心"
+  }
+]

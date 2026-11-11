@@ -1,0 +1,102 @@
+[
+  {
+    "id": "duanqiao",
+    "name": "断桥",
+    "lat": 30.260901,
+    "lng": 120.14703,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": "duanqiao.glb"
+  },
+  {
+    "id": "baidi",
+    "name": "白堤",
+    "lat": 30.257454,
+    "lng": 120.144034,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": null
+  },
+  {
+    "id": "sudi",
+    "name": "苏堤",
+    "lat": 30.242122,
+    "lng": 120.134592,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": null
+  },
+  {
+    "id": "leifeng",
+    "name": "雷峰塔",
+    "lat": 30.233886,
+    "lng": 120.145015,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": "leifeng.glb"
+  },
+  {
+    "id": "santan",
+    "name": "三潭印月",
+    "lat": 30.241247,
+    "lng": 120.140675,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": "santan.glb"
+  },
+  {
+    "id": "huxinting",
+    "name": "湖心亭",
+    "lat": 30.248587,
+    "lng": 120.139663,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": "huxinting.glb"
+  },
+  {
+    "id": "baochu",
+    "name": "保俶塔",
+    "lat": 30.263342,
+    "lng": 120.143375,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": "baochu.glb"
+  },
+  {
+    "id": "quyuan",
+    "name": "曲院风荷",
+    "lat": 30.253469,
+    "lng": 120.130985,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": "quyuan.glb"
+  },
+  {
+    "id": "huagang",
+    "name": "花港观鱼",
+    "lat": 30.234386,
+    "lng": 120.137392,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": "huagang.glb"
+  },
+  {
+    "id": "yuewang",
+    "name": "岳王庙",
+    "lat": 30.254678,
+    "lng": 120.129822,
+    "poem": "",
+    "poemSource": "",
+    "intro": "",
+    "model": "yuewang.glb"
+  }
+]

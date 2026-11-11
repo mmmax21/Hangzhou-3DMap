@@ -1,0 +1,14 @@
+[out:json][timeout:180][bbox:30.205,120.085,30.285,120.185];
+(
+  way["natural"="water"];
+  relation["natural"="water"];
+  way["waterway"~"river|canal"];
+  way["building"];
+  relation["building"];
+  way["highway"~"^(primary|secondary|tertiary|trunk)$"];
+  way["leisure"~"park|garden"];
+  way["landuse"~"forest|grass"];
+  way["natural"~"wood"];
+  nwr["name"~"断桥|白堤|苏堤|雷峰塔|三潭印月|湖心亭|保俶塔|曲院风荷|花港观鱼|岳王庙|岳飞墓|小瀛洲|阮公墩|孤山"];
+);
+out geom;
