@@ -152,3 +152,11 @@
 - 已增加 `.github/workflows/pages.yml` 和 `docs/DEPLOYMENT.md`：推送到 `main` 时构建 `/Hangzhou-3DMap/` 子路径版并发布 GitHub Pages，提交为 `a4df884`。`app/vite.config.ts` 支持用 `VITE_BASE_PATH` 配置站点基路径；默认 `/` 供本地预览或域名根路径使用。
 - 用户提供的仓库地址为 `https://github.com/mmmax21/Hangzhou-3DMap.git`。当前 GitHub 连接未建立，不能推送提交或检查 Actions 部署结果；尚无公网验收地址。下一步需在环境中启用 GitHub 网络访问和 Git 凭证，添加 remote 并推送 `main`，在仓库 Settings → Pages 选择 GitHub Actions，再检查 Actions 发布结果及最终站点。
 - 当前 `main` 上阶段 6/Pages 相关本地提交：`f6d2cfc`、`a4df884`。此前阶段逐项提交仍在其历史中。
+
+### 同日补充：资产到位与推送结果
+
+- 随后工作区出现了 9 个清理后的 GLB 和 `docs/ASSETS.md`，已全部接入高画质；三潭印月改用 `santan-pavilion.glb` 并组合三座 `santan-stone.glb`，苏堤复用断桥。模型按配置的高度/方向放置，材质统一粗糙度、零金属度、贴图降饱和与夜间暖色自发光。
+- 为保性能，将高档地形细分从 512 调到 480，高档全景实测约 59 calls / 1.46M triangles；低档仍为 37 calls / 0.49M triangles，景点使用轻量占位（已同步 PRD）。所有 10 个景点保留列表、卡片与飞行。浏览器检查雷峰塔近景、昼夜模型加载，控制台没有 error。
+- 新增最终对比：`docs/screenshots/models-compare.jpg`（左右为定稿/网页），对应 `models-day.jpg`、`models-night.jpg`。因此上文“没有 GLB”的记录仅表示早先步骤的状态，当前已不适用。
+- `origin` 已添加为用户指定的 GitHub 仓库。执行 `git push -u origin main` 返回 `RPC failed; HTTP 400` / `unexpected disconnect`，未确认任何远程提交成功；Pages 尚未发布。未修改本机全局代理设置。需修复 GitHub 网络/认证后重新推送，不能把预计的 Pages URL 当作已上线地址。
+- `VITE_BASE_PATH=/Hangzhou-3DMap/ npm --prefix app run build` 已通过，生成资源引用包含正确仓库前缀。GLB 加入后产物约 7.7 MB，在 15 MB 首屏预算内。M1/手机实际性能仍待目标设备验收。

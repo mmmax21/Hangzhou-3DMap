@@ -58,7 +58,7 @@ export const style = {
     exaggeration: 3.5, // PRD 第 3 节：只作用于地形
     peakCurve: 0.2, // 高处额外加陡：海拔差达到 peakRef 时再乘 1.2
     peakRef: 240,
-    segments: 512, // 网格细分（长边），三角面约 2*512*472
+    segments: 480, // 为景点精模留出三角面预算
     lowSegments: 224, smoothingWeights: [4, 2, 1] as const,
     // 高程分带（米，海拔）。噪声会扰动分界，形成笔触感的色块
     footTop: 24,
@@ -136,6 +136,10 @@ export const style = {
     placeholderSize: [7, 12, 7] as [number, number, number],
     nightGlow: 1.8,
     modelSize: 22, hoverLift: 3, hoverDamping:10, flightDuration: 1.5,
+    modelSaturation: .55, modelRoughness: .9,
+    sizes: { leifeng:17.9, baochu:10.4, duanqiao:12, huxinting:7, santan:7, quyuan:8, huagang:8, yuewang:9, sudi:7 } as Record<string,number>,
+    rotations: { duanqiao:-.65, sudi:1.4 } as Record<string,number>,
+    stoneSize: .7, stoneOffsets: [[-10,0,24],[0,0,31],[10,0,24]] as [number,number,number][],
     flightOffset: [0, 75, 115] as [number, number, number],
     clickMaxDrag: 3, markerRadius:2.2, markerHeight:2, markerSegments:16, labelLift:4,
   },
