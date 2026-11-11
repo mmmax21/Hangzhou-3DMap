@@ -31,7 +31,20 @@ export const style = {
     moonReflection: { day: '#D3A56E', night: '#D3A56E' },
     seal: { day: '#B5352A', night: '#B5352A' },
     plateInk: { day: '#4A3A28', night: '#C9A15A' }, // 新增：铭牌文字
+    willow: { day: '#A9B04F', night: '#4C512F' },
+    forest: { day: '#575932', night: '#1E2A22' },
+    trunk: { day: '#826B43', night: '#302C22' },
     placeholder: { day: '#B5352A', night: '#6A2A22' }, // 新增：景点占位方块
+  },
+
+  trees: {
+    seed: 137, forestSpacing: 7.5, forestProbability: 0.78,
+    shoreSpacing: 7, dikeSpacing: 6, shoreOffset: 2.2,
+    crownRadius: 3.4, crownHeight: 3.5, trunkHeight: 3.2,
+    willowHeight: 6.2, willowRadius: 2.5, variation: 0.32,
+    minMountainY: 7, maxMountainY: 105, edgeMargin: 12,
+    landmarkClearance: 8, nightGlow: 0.08,
+    crownSegments: 7, crownRings: 5,
   },
 
   terrain: {

@@ -35,6 +35,7 @@ export type SceneData = {
   ridgeTex: THREE.DataTexture
   buildings: { origin: [number, number]; scale: number; buildings: number[][] }
   roads: { origin: [number, number]; scale: number; roads: (string | number)[][] }
+  green: { polygons: { outer: number[][]; holes: number[][][] }[]; dikes: number[][][] }
   water: GeoJSON
 }
 
@@ -48,7 +49,7 @@ async function png(url: string) {
 }
 
 async function load(): Promise<SceneData> {
-  const [meta, hm, wm, rd, buildings, roads, water] = await Promise.all([
+  const [meta, hm, wm, rd, buildings, roads, water, green] = await Promise.all([
     fetch(base + 'heightmap.json').then((r) => r.json()),
     png(base + 'heightmap.png'),
     png(base + 'watermask.png'),
@@ -56,6 +57,7 @@ async function load(): Promise<SceneData> {
     fetch(base + 'buildings.json').then((r) => r.json()),
     fetch(base + 'roads.json').then((r) => r.json()),
     fetch(base + 'water.geojson').then((r) => r.json()),
+    fetch(base + 'green.json').then((r) => r.json()),
   ])
   const n = hm.width
   const src = hm.data as Uint16Array
@@ -92,7 +94,7 @@ async function load(): Promise<SceneData> {
   }
   const ridgeTex = rgba(rd)
 
-  return { meta, elevation, heightTex, mask, maskSize: m, maskTex, ridgeTex, buildings, roads, water }
+  return { meta, elevation, heightTex, mask, maskSize: m, maskTex, ridgeTex, buildings, roads, water, green }
 }
 
 let promise: Promise<SceneData> | null = null
