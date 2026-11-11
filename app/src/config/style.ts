@@ -8,7 +8,7 @@ export type DN<T> = { day: T; night: T }
 export const style = {
   colors: {
     background: { day: '#C9AE96', night: '#0F151F' },
-    base: { day: '#D5B088', night: '#14171C' },
+    base: { day: '#D5B088', night: '#30343B' },
     baseTop: { day: '#E3CDA8', night: '#171A1F' }, // 新增：底座顶面留边
     baseEdge: { day: '#B8955A', night: '#8A6A30' }, // 白天为新增的淡金细线
     water: { day: '#ECD8BA', night: '#1C3648' },
@@ -98,7 +98,7 @@ export const style = {
     rippleScale: 0.08,
     rippleStrength: { day: 0.015, night: 0.025 },
     shoreTint: 0.55, // 近岸倒影强度
-    moonBand: { width: 0.03, breakFreq: 0.45, strength: 2.6 }, // width：倒影带的角半宽（弧度）；breakFreq：碎光沿带方向的频率
+    moonBand: { width: 0.016, breakFreq: 0.45, strength: 2.6 }, // width：倒影带的角半宽（弧度）；breakFreq：碎光沿带方向的频率
     shoreLights: { strength: 1.1, reach: 0.07, streak: 18.0 }, // 岸灯倒影：reach 为离岸距离（watermask G 通道单位）
   },
 
@@ -108,10 +108,10 @@ export const style = {
     towerHeight: 40, // 高于此（米）视为高楼，降饱和
     windowFloor: 3.2, // 窗格层高（米）
     windowSpacing: 4.5, // 窗格水平间距（米）
-    windowLitRatio: 0.5,
-    windowGlow: 3.2, // 夜晚窗灯亮度（>1 进入辉光）
+    windowLitRatio: 0.9,
+    windowGlow: 4.2, // 夜晚窗灯亮度（>1 进入辉光）
     windowMinPx: 2.5, // 远处每个窗格至少占多少像素（LOD 合并）
-    wallGlow: 0.03, // 夜晚墙体整体微光
+    wallGlow: 0.08, // 夜晚墙体整体微光
   },
 
   roads: {
