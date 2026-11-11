@@ -7,6 +7,7 @@ import { Landmarks } from './Landmarks'
 import { Roads, ShoreLights } from './NightLights'
 import { PostFX } from './PostFX'
 import { Terrain } from './Terrain'
+import { Mist } from './Mist'
 import { Trees } from './Trees'
 import { Water } from './Water'
 import { BenchHook, Perf, ShotHook } from './Perf'
@@ -24,6 +25,7 @@ export function Scene() {
         <Roads />
         <ShoreLights />
         <Trees />
+        <Mist />
         <Landmarks />
       </Suspense>
       <PostFX />

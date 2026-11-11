@@ -31,6 +31,7 @@ export const style = {
     moonReflection: { day: '#D3A56E', night: '#D3A56E' },
     seal: { day: '#B5352A', night: '#B5352A' },
     plateInk: { day: '#4A3A28', night: '#C9A15A' }, // 新增：铭牌文字
+    mist: { day: '#F4EEE2', night: '#253035' },
     willow: { day: '#A9B04F', night: '#4C512F' },
     forest: { day: '#575932', night: '#1E2A22' },
     trunk: { day: '#826B43', night: '#302C22' },
@@ -45,6 +46,12 @@ export const style = {
     minMountainY: 7, maxMountainY: 105, edgeMargin: 12,
     landmarkClearance: 8, nightGlow: 0.08,
     crownSegments: 7, crownRings: 5,
+  },
+
+  mist: {
+    grid: 65, minY: 12, maxY: 65, lift: 4, width: 115, height: 15,
+    opacity: { day: 0.34, night: 0.25 }, drift: 0.8, noiseScale: 5,
+    edgeMargin: 35, landmarkClearance: 25,
   },
 
   terrain: {
