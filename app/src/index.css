@@ -1,0 +1,27 @@
+:root {
+  --font-serif: 'Songti SC', 'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif;
+  --ui-day-bg: rgba(242, 232, 213, 0.82);
+  --ui-day-fg: #4a3a28;
+  --ui-day-line: #b8955a;
+  --ui-night-bg: rgba(20, 23, 28, 0.82);
+  --ui-night-fg: #e0b050;
+  --ui-night-line: #8a6a30;
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; overflow: hidden; }
+body { background: #c9ae96; font-family: var(--font-serif); }
+.app { position: fixed; inset: 0; }
+.night-toggle {
+  position: absolute; top: 20px; right: 20px;
+  width: 52px; height: 52px; border-radius: 50%;
+  font-family: var(--font-serif); font-size: 22px; cursor: pointer;
+  border: 1px solid var(--ui-day-line); background: var(--ui-day-bg); color: var(--ui-day-fg);
+  transition: background 3s ease, color 3s ease, border-color 3s ease;
+  backdrop-filter: blur(4px);
+}
+.is-night .night-toggle { border-color: var(--ui-night-line); background: var(--ui-night-bg); color: var(--ui-night-fg); }
+.night-toggle:hover { transform: scale(1.04); }
+.perf {
+  position: absolute; top: 8px; left: 8px; padding: 4px 8px;
+  font: 12px/1.4 ui-monospace, monospace; color: #fff; background: rgba(0, 0, 0, 0.55); border-radius: 4px;
+}

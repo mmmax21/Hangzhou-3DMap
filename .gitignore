@@ -30,3 +30,4 @@ pipeline/cache/
 /scope-basemap.pgw
 /scope-basemap.png
 /scope-schematic.svg
+*.tsbuildinfo
