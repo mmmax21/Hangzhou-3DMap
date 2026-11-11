@@ -3,7 +3,7 @@
  * 1 单位 = 10 米，原点在范围中心，X 向东，Z 向南，Y 向上。
  * 全项目只允许通过 lngLatToScene 做经纬度转换。
  */
-export const BBOX = { west: 120.085, east: 120.185, south: 30.205, north: 30.285 } as const
+export const BBOX = { west: 120.1, east: 120.168, south: 30.215, north: 30.27 } as const
 
 const LNG0 = (BBOX.west + BBOX.east) / 2
 const LAT0 = (BBOX.south + BBOX.north) / 2

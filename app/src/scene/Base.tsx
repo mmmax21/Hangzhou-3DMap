@@ -186,7 +186,7 @@ void main() {
 function Nameplate() {
   const { material, width, height, z } = useMemo(() => {
     const tex = makePlateTexture()
-    const width = 360
+    const width = 300
     const height = (width * 360) / 2048
     const m = new THREE.ShaderMaterial({
       vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,

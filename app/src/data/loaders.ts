@@ -31,6 +31,8 @@ export type SceneData = {
   mask: Uint8Array
   maskSize: number
   maskTex: THREE.DataTexture
+  /** ridges.png：R 到山脊距离（/16 像素），G 山脊强度 */
+  ridgeTex: THREE.DataTexture
   buildings: { origin: [number, number]; scale: number; buildings: number[][] }
   roads: { origin: [number, number]; scale: number; roads: (string | number)[][] }
   water: GeoJSON
@@ -46,10 +48,11 @@ async function png(url: string) {
 }
 
 async function load(): Promise<SceneData> {
-  const [meta, hm, wm, buildings, roads, water] = await Promise.all([
+  const [meta, hm, wm, rd, buildings, roads, water] = await Promise.all([
     fetch(base + 'heightmap.json').then((r) => r.json()),
     png(base + 'heightmap.png'),
     png(base + 'watermask.png'),
+    png(base + 'ridges.png'),
     fetch(base + 'buildings.json').then((r) => r.json()),
     fetch(base + 'roads.json').then((r) => r.json()),
     fetch(base + 'water.geojson').then((r) => r.json()),
@@ -75,7 +78,21 @@ async function load(): Promise<SceneData> {
   maskTex.magFilter = maskTex.minFilter = THREE.LinearFilter
   maskTex.needsUpdate = true
 
-  return { meta, elevation, heightTex, mask, maskSize: m, maskTex, buildings, roads, water }
+  const rgba = (p: typeof rd) => {
+    const out = new Uint8Array(p.width * p.height * 4)
+    const src8 = p.data as Uint8Array
+    for (let i = 0; i < p.width * p.height; i++) {
+      for (let c = 0; c < 3; c++) out[i * 4 + c] = src8[i * p.channels + c]
+      out[i * 4 + 3] = 255
+    }
+    const t = new THREE.DataTexture(out, p.width, p.height, THREE.RGBAFormat, THREE.UnsignedByteType)
+    t.magFilter = t.minFilter = THREE.LinearFilter
+    t.needsUpdate = true
+    return t
+  }
+  const ridgeTex = rgba(rd)
+
+  return { meta, elevation, heightTex, mask, maskSize: m, maskTex, ridgeTex, buildings, roads, water }
 }
 
 let promise: Promise<SceneData> | null = null

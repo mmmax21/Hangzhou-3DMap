@@ -45,14 +45,17 @@ void main() {
   col = mix(col, DNC(cShore), (1.0 - smoothstep(0.0, 0.12, depth)) * ${W.shoreTint.toFixed(2)});
   col *= 1.0 + (fbm(vPos.xz * 0.02) - 0.5) * 0.04;
 
-  // 月光倒影带：反射向量对准月亮，沿视线方向拉长
-  vec3 R = reflect(V, n);
+  // 月光倒影：从相机朝月亮方位延伸的一条窄带，按角宽度计算（近窄远宽符合透视），再切成横向碎光
   vec3 md = normalize(uMoonDir);
-  float s = max(dot(normalize(R.xz), normalize(md.xz)), 0.0);
-  float elev = 1.0 - abs(R.y - abs(md.y)) * ${W.moonBand.stretch.toFixed(2)};
-  float band = pow(s, ${W.moonBand.power.toFixed(1)}) * clamp(elev, 0.0, 1.0);
-  band *= 0.5 + 0.8 * vnoise(vPos.xz * vec2(0.6, 0.15) + t * 3.0);
-  col += DNC(cMoonRefl) * band * ${W.moonBand.strength.toFixed(2)} * uNight;
+  vec2 mdir = normalize(md.xz);
+  vec2 toP = vPos.xz - cameraPosition.xz;
+  float alongM = dot(toP, mdir);
+  float lateral = abs(toP.x * mdir.y - toP.y * mdir.x);
+  float ang = lateral / max(alongM, 1.0);
+  float band = exp(-pow(ang / ${W.moonBand.width.toFixed(3)}, 2.0)) * step(0.0, alongM);
+  float glint = smoothstep(0.45, 0.85, vnoise(vec2(alongM * ${W.moonBand.breakFreq.toFixed(2)}, lateral * 0.12) + vec2(t * 2.0, 0.0)));
+  glint *= 0.6 + 0.6 * vnoise(vPos.xz * 0.9 - t);
+  col += DNC(cMoonRefl) * band * glint * ${W.moonBand.strength.toFixed(2)} * uNight;
 
   // 岸边灯光的拉长倒影：近岸带上、沿相机方向拉长的暖色条纹
   vec2 vd = normalize(V.xz);

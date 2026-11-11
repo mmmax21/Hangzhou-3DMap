@@ -34,9 +34,15 @@ ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "pipeline" / "cache"
 OUT = ROOT / "app" / "public" / "data"
 
-# PRD 第 3 节范围（WGS-84）
-WEST, EAST, SOUTH, NORTH = 120.085, 120.185, 30.205, 30.285
+# PRD 第 3 节范围（WGS-84），阶段 3 返工时缩小
+WEST, EAST, SOUTH, NORTH = 120.100, 120.168, 30.215, 30.270
 SIZE = 1024
+# 山脊网络（PRD 6.3）：反转地形上做 D8 汇流累积，汇流大的地方就是原地形的山脊
+RIDGE_SMOOTH = 2.5  # 提取前对高度图的高斯平滑（像素），去掉小起伏
+RIDGE_MIN_RELIEF = 35.0  # 高出水位多少米以上才算山地
+RIDGE_MIN_ACC = 500  # 汇流累积阈值（像素数），越大山脊越少
+RIDGE_MIN_LEN = 30  # 删除短于此像素数的山脊碎段
+RIDGE_DIST_MAX = 16.0  # 距离场编码上限（像素）
 SUPER = 4  # 遮罩超采样倍数
 LAKE_DEPTH_M = 1.5  # 湖底低于水位的深度（米）
 LAND_MIN_ABOVE_WATER_M = 0.4  # 陆地最低比水位高多少（米）
@@ -287,6 +293,7 @@ def main():
         "verticalDatum": "EGM2008",
     }
     json.dump(meta, open(OUT / "heightmap.json", "w"), ensure_ascii=False, indent=2)
+    ridge_mask = ridges(hf, binm, water_level)
     print(f"高度图: {hmin:.1f} .. {hmax:.1f} m")
 
     # ------------------------------------------------ 建筑
@@ -386,13 +393,64 @@ def main():
     json.dump(out, open(ROOT / "pipeline" / "landmarks.calibrated.json", "w"), ensure_ascii=False, indent=2)
 
     # 叠加检查图（不进网页）
-    preview(hf, mask, out, water_level)
+    preview(hf, mask, out, water_level, ridge_mask)
 
 
-def preview(hf, mask, landmarks, water_level):
+def ridges(hf, water, water_level):
+    """输出 ridges.png：R = 到最近山脊像素的距离（0..RIDGE_DIST_MAX 像素映射到 0..255），
+    G = 该山脊的强度（log 汇流累积归一化）。返回山脊二值图供预览。"""
+    n = hf.shape[0]
+    h = ndimage.gaussian_filter(hf, RIDGE_SMOOTH)
+    pad = np.pad(h, 1, mode="edge")
+    idx = np.arange(n * n).reshape(n, n)
+    rec = idx.copy()
+    best = np.zeros_like(h)
+    yy, xx = np.mgrid[0:n, 0:n]
+    for dy in (-1, 0, 1):
+        for dx in (-1, 0, 1):
+            if dy == 0 and dx == 0:
+                continue
+            nb = pad[1 + dy:1 + dy + n, 1 + dx:1 + dx + n]
+            slope = (nb - h) / math.hypot(dx, dy)  # 反转地形的下坡 = 原地形的上坡
+            better = slope > best
+            best[better] = slope[better]
+            ny = np.clip(yy + dy, 0, n - 1)
+            nx = np.clip(xx + dx, 0, n - 1)
+            rec[better] = (ny * n + nx)[better]
+    relief = h - water_level
+    weight = ((relief > RIDGE_MIN_RELIEF) & ~water).astype(np.float64).ravel()
+    acc = weight.copy().tolist()
+    recl = rec.ravel().tolist()
+    for i in np.argsort(h.ravel(), kind="stable").tolist():  # 从低到高传递
+        r = recl[i]
+        if r != i:
+            acc[r] += acc[i]
+    acc = np.array(acc).reshape(n, n)
+    ridge = (acc > RIDGE_MIN_ACC) & (relief > RIDGE_MIN_RELIEF + 20)
+    lab, nlab = ndimage.label(ridge, structure=np.ones((3, 3)))
+    sizes = ndimage.sum(ridge, lab, range(1, nlab + 1))
+    keep = np.isin(lab, np.nonzero(sizes >= RIDGE_MIN_LEN)[0] + 1)
+    ridge = ridge & keep
+    d, (iy, ix) = ndimage.distance_transform_edt(~ridge, return_indices=True)
+    la = np.log(np.maximum(acc, 1))
+    lo, hi = math.log(RIDGE_MIN_ACC), la[ridge].max() if ridge.any() else 1.0
+    strength = np.clip((la[iy, ix] - lo) / max(hi - lo, 1e-6), 0, 1)
+    rgb = np.stack([
+        np.clip(d / RIDGE_DIST_MAX, 0, 1) * 255,
+        strength * 255,
+        np.zeros_like(d),
+    ], -1).round().astype(np.uint8)
+    Image.fromarray(rgb, "RGB").save(OUT / "ridges.png", optimize=True)
+    print(f"山脊: {int(ridge.sum())} 像素, {int((sizes >= RIDGE_MIN_LEN).sum())} 段")
+    return ridge
+
+
+def preview(hf, mask, landmarks, water_level, ridge=None):
     v = np.clip((hf - water_level) / 250.0, 0, 1) ** 0.5
     rgb = np.stack([60 + 180 * v, 120 + 110 * v, 60 + 160 * v], -1).astype(np.uint8)
     rgb[mask > 0.5] = (rgb[mask > 0.5] * 0.3 + np.array([40, 90, 200]) * 0.7).astype(np.uint8)
+    if ridge is not None:
+        rgb[ridge] = (230, 170, 40)
     img = Image.fromarray(rgb)
     d = ImageDraw.Draw(img)
     for lm in landmarks:

@@ -56,17 +56,19 @@ void main() {
   // 夜晚：程序化窗格
   if (isRoof < 0.5) {
     float along = dot(vPos.xz, vec2(-n.z, n.x)) * 10.0; // 米
-    vec2 cell = vec2(along / ${B.windowSpacing.toFixed(2)}, vLocalY / ${B.windowFloor.toFixed(2)});
+    vec2 cell0 = vec2(along / ${B.windowSpacing.toFixed(2)}, vLocalY / ${B.windowFloor.toFixed(2)});
+    // 窗格 LOD：远处把窗格按 2 的幂合并，保证每个亮点至少约 2 像素，形成点点灯火而不是均匀的暖色
+    float fw0 = max(fwidth(cell0.x), fwidth(cell0.y));
+    float lod = exp2(max(ceil(log2(fw0 * ${B.windowMinPx.toFixed(1)})), 0.0));
+    vec2 cell = cell0 / lod;
     vec2 id = floor(cell);
     vec2 f = fract(cell);
-    float win = step(0.22, f.x) * step(f.x, 0.78) * step(0.3, f.y) * step(f.y, 0.8);
-    float on = step(1.0 - ${B.windowLitRatio.toFixed(2)}, hash12(id + vSeed * 37.0));
+    float win = step(0.2, f.x) * step(f.x, 0.8) * step(0.25, f.y) * step(f.y, 0.8);
+    float ratio = ${B.windowLitRatio.toFixed(2)} / sqrt(lod);   // 合并后亮点更稀，整体亮度不随距离暴涨
+    float on = step(1.0 - ratio, hash12(id + vSeed * 37.0 + lod * 3.1));
     float valid = step(1.5, vLocalY) * step(vLocalY, vHeight - 1.0);
-    float warm = 0.7 + 0.3 * hash12(id * 1.7 + vSeed);
-    // 远处窗格小于一个像素时退化为平均亮度，避免闪烁
-    float fw = max(fwidth(cell.x), fwidth(cell.y));
-    float wl = mix(win * on * warm, 0.28 * ${B.windowLitRatio.toFixed(2)} * 0.85, smoothstep(0.35, 0.9, fw));
-    col += DNC(cLight) * wl * valid * ${B.windowGlow.toFixed(2)} * uNight;
+    float warm = 0.65 + 0.35 * hash12(id * 1.7 + vSeed);
+    col += DNC(cLight) * win * on * warm * valid * ${B.windowGlow.toFixed(2)} * uNight;
     col += DNC(cLight) * ${B.wallGlow.toFixed(3)} * uNight;
   }
   gl_FragColor = vec4(col, 1.0);

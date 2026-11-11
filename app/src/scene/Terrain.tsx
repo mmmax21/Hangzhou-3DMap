@@ -26,6 +26,7 @@ uniform vec2 uSize;      // 场景宽、深
 uniform float uTexel;    // 1 / 高度图尺寸
 uniform float uWaterLevel;
 uniform float uExag;
+uniform sampler2D uRidge;
 uniform vec3 cHigh[2]; uniform vec3 cHigh2[2]; uniform vec3 cMid[2]; uniform vec3 cMid2[2];
 uniform vec3 cFoot[2]; uniform vec3 cPlain[2]; uniform vec3 cShore[2]; uniform vec3 cGold[2];
 uniform vec3 cRim[2]; uniform vec3 cSun[2];
@@ -43,8 +44,8 @@ void main() {
   // 每个高度图像素的米数
   vec2 pm = uSize * 10.0 * uTexel;
   vec2 tx = vec2(uTexel, 0.0), tz = vec2(0.0, uTexel);
-  float dx = (H(uv + tx) - H(uv - tx)) / (2.0 * pm.x) * uExag;
-  float dz = (H(uv + tz) - H(uv - tz)) / (2.0 * pm.y) * uExag;
+  float dx = (terrainYm(H(uv + tx), uWaterLevel) - terrainYm(H(uv - tx), uWaterLevel)) / (2.0 * pm.x);
+  float dz = (terrainYm(H(uv + tz), uWaterLevel) - terrainYm(H(uv - tz), uWaterLevel)) / (2.0 * pm.y);
   vec3 n = normalize(vec3(-dx, 1.0, -dz));
   float slope = 1.0 - n.y;
 
@@ -70,8 +71,8 @@ void main() {
   col = mix(col, mid, smoothstep(${T.footTop.toFixed(1)} - 12.0, ${T.footTop.toFixed(1)} + 12.0, eN));
   // 石青：高处、山脊、陡坡偏青；山谷偏绿。笔触扰动边界
   float heightT = smoothstep(${T.midTop.toFixed(1)}, ${T.highTop.toFixed(1)}, eN);
-  float blueT = heightT * 0.75 + ridgeT * 0.55 - valleyT * 0.45 + slope * ${T.slopeToBlue.toFixed(2)} * 0.5 + (brush - 0.5) * 0.7;
-  blueT = smoothstep(0.42, 0.72, blueT) * smoothstep(${T.footTop.toFixed(1)}, ${(T.footTop + 30).toFixed(1)}, eN);
+  float blueT = heightT + ridgeT * 0.25 - valleyT * 0.25 + slope * ${T.slopeToBlue.toFixed(2)} * 0.3 + (brush - 0.5) * 0.35;
+  blueT = smoothstep(0.38, 0.66, blueT) * smoothstep(${T.footTop.toFixed(1)}, ${(T.footTop + 30).toFixed(1)}, eN);
   col = mix(col, high, blueT);
   // 山脊提亮、山谷压暗，形成绢本设色的明暗层次
   col = mix(col, col * 1.18 + 0.03, ridgeT * smoothstep(40.0, 90.0, e) * ${T.ridgeHighlight.toFixed(2)});
@@ -93,18 +94,15 @@ void main() {
   float wrap = clamp(ndl * 0.6 + 0.4, 0.0, 1.0);
   col *= DNF(pAmb) + DNF(pSunI) * wrap * DNC(cSun);
 
-  // 山脊金线：平滑凸度场的等值线（勾出山脊两侧轮廓），再叠加很淡的凸处等高线
-  float r2 = 7.0;
-  float lap2 = (H(uv + tx * r2) + H(uv - tx * r2) + H(uv + tz * r2) + H(uv - tz * r2) - 4.0 * e) / pow(r2 * pm.x, 2.0);
-  float cv = -lap2;
-  float c0 = ${T.ridge.convexity.toFixed(4)};
-  float lineD = abs(cv - c0) / max(fwidth(cv), 1e-6);
-  float line = 1.0 - smoothstep(${T.ridge.width.toFixed(2)} - 0.5, ${T.ridge.width.toFixed(2)} + 0.5, lineD);
-  float f = e / ${T.ridge.interval.toFixed(1)};
-  float cD = abs(fract(f - 0.5) - 0.5) / max(fwidth(f), 1e-4);
-  float cline = (1.0 - smoothstep(0.4, 1.2, cD)) * smoothstep(c0, c0 + ${T.ridge.convexitySoft.toFixed(4)}, convex) * ${T.ridge.contourMix.toFixed(2)};
-  line = max(line, cline);
-  line *= smoothstep(${T.ridge.minElevation.toFixed(1)}, ${(T.ridge.minElevation + 25).toFixed(1)}, e);
+  // 山脊金线：采样管线烘焙的山脊距离场（R = 距离/16 像素，G = 山脊强度），按屏幕像素定线宽
+  vec4 rg = texture2D(uRidge, uv);
+  float dTex = rg.r * 16.0;                       // 到山脊的距离（高度图像素）
+  float texPerPx = max(fwidth(uv.x), fwidth(uv.y)) / uTexel;
+  float strengthR = rg.g;
+  float wPx = ${T.ridge.width.toFixed(2)} * mix(0.6, 1.25, strengthR);
+  float wTex = wPx * texPerPx;
+  float line = 1.0 - smoothstep(wTex * 0.5, wTex * 0.5 + texPerPx, dTex);
+  line *= smoothstep(${T.ridge.minStrength.toFixed(2)}, ${(T.ridge.minStrength + 0.25).toFixed(2)}, strengthR);
   vec3 gold = DNC(cGold) * (1.0 + DNF(pRidgeGlow));
   col = mix(col, gold, line * DNF(pRidgeStrength));
 
@@ -169,6 +167,7 @@ export function Terrain() {
           uTexel: { value: 1 / d.meta.size },
           uWaterLevel: { value: d.meta.waterLevel },
           uExag: { value: T.exaggeration },
+          uRidge: { value: d.ridgeTex },
           cHigh: colorPair(C.mountainHigh),
           cHigh2: colorPair(C.mountainHigh2),
           cMid: colorPair(C.mountainMid),

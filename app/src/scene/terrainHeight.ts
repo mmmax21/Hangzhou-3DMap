@@ -14,9 +14,16 @@ export function octSDF(x: number, z: number, grow = 0) {
   return d - grow
 }
 
-/** 海拔（米）-> 场景 y，水位在 y=0，含 2 倍地形夸张 */
+/**
+ * 海拔（米）-> 场景 y，水位在 y=0。
+ * 线性夸张 exaggeration，再对高处乘 (1 + peakCurve * min(h / peakRef, 1)) 让山顶更陡。
+ * GLSL 里的 terrainYm() 与此一致（见 shaders/common.ts）。
+ */
 export function elevationToY(d: SceneData, e: number) {
-  return metersToUnits((e - d.meta.waterLevel) * style.terrain.exaggeration)
+  const T = style.terrain
+  const h = e - d.meta.waterLevel
+  const k = 1 + T.peakCurve * Math.min(Math.max(h / T.peakRef, 0), 1)
+  return metersToUnits(h * T.exaggeration * k)
 }
 
 function smoothstep(a: number, b: number, x: number) {

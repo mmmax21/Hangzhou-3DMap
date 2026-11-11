@@ -3,7 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { style } from '../config/style'
 import { lngLatToScene } from '../geo/geo'
-import { useSceneData } from '../data/loaders'
+import { sampleMask, useSceneData } from '../data/loaders'
+import { sceneToUV } from '../geo/geo'
 import { colorPair, shared } from '../state/night'
 import { glslCommon } from '../shaders/common'
 import { octSDF, terrainY } from './terrainHeight'
@@ -37,6 +38,8 @@ export function Roads() {
     const step = 3
     for (const item of roads) {
       const w = (R.width[item[0] as string] ?? 1) / 2
+      // 只保留主干道和环湖道路，避免像导航地图
+      const keepAll = (R.keepClasses as readonly string[]).includes(item[0] as string)
       const pts: [number, number][] = []
       for (let i = 1; i + 1 < item.length; i += 2) {
         pts.push(lngLatToScene(origin[0] + (item[i] as number) * scale, origin[1] + (item[i + 1] as number) * scale))
@@ -52,6 +55,10 @@ export function Roads() {
       for (let i = 0; i < dense.length - 1; i++) {
         const [x0, z0] = dense[i], [x1, z1] = dense[i + 1]
         if (octSDF(x0, z0) > -6) continue
+        if (!keepAll) {
+          const [u, v] = sceneToUV(x0, z0)
+          if (sampleMask(d, u, v, 2) > R.lakeReach) continue
+        }
         const len = Math.hypot(x1 - x0, z1 - z0) || 1
         const nx = (-(z1 - z0) / len) * w, nz = ((x1 - x0) / len) * w
         const y0 = terrainY(d, x0, z0) + R.lift, y1 = terrainY(d, x1, z1) + R.lift

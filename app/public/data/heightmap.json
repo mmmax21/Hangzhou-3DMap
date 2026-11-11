@@ -1,16 +1,16 @@
 {
   "source": "Copernicus GLO-30 DEM (DSM), grey-opened and smoothed; lakes flattened by watermask",
   "bbox": {
-    "west": 120.085,
-    "south": 30.205,
-    "east": 120.185,
-    "north": 30.285
+    "west": 120.1,
+    "south": 30.215,
+    "east": 120.168,
+    "north": 30.27
   },
   "size": 1024,
   "pixelCenters": "pixel (i,j) center = (west + (i+0.5)/size*(east-west), north - (j+0.5)/size*(north-south)); row 0 = north",
   "encoding": "elevation_m = minElevation + value/65535*(maxElevation-minElevation)",
   "minElevation": 6.0,
-  "maxElevation": 396.897,
+  "maxElevation": 255.778,
   "waterLevel": 7.5,
   "lakeFloor": 6.0,
   "verticalDatum": "EGM2008"

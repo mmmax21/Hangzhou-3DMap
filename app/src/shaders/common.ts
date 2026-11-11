@@ -1,4 +1,5 @@
 import { OCT } from '../scene/terrainHeight'
+import { style } from '../config/style'
 
 /** 所有自定义着色器共享的 GLSL 片段 */
 export const glslCommon = /* glsl */ `
@@ -6,6 +7,11 @@ uniform float uNight;
 uniform float uTime;
 uniform vec3 uSunDir;
 #define DNC(a) mix(a[0], a[1], uNight)
+// 海拔（米）-> 夸张后的高度（米），与 terrainHeight.ts 的 elevationToY 一致
+float terrainYm(float e, float wl) {
+  float h = e - wl;
+  return h * ${style.terrain.exaggeration.toFixed(3)} * (1.0 + ${style.terrain.peakCurve.toFixed(3)} * clamp(h / ${style.terrain.peakRef.toFixed(1)}, 0.0, 1.0));
+}
 #define DNF(a) mix(a[0], a[1], uNight)
 
 const vec3 OCT = vec3(${OCT.hx.toFixed(4)}, ${OCT.hz.toFixed(4)}, ${OCT.c.toFixed(4)});

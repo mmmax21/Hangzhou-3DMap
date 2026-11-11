@@ -35,12 +35,14 @@ export const style = {
   },
 
   terrain: {
-    exaggeration: 2, // PRD 第 3 节：只作用于地形
+    exaggeration: 3.5, // PRD 第 3 节：只作用于地形
+    peakCurve: 0.2, // 高处额外加陡：海拔差达到 peakRef 时再乘 1.2
+    peakRef: 240,
     segments: 512, // 网格细分（长边），三角面约 2*512*472
     // 高程分带（米，海拔）。噪声会扰动分界，形成笔触感的色块
     footTop: 24,
-    midTop: 60,
-    highTop: 200,
+    midTop: 70,
+    highTop: 150,
     bandNoise: 38, // 分界扰动幅度（米）
     slopeToBlue: 0.8, // 坡度越陡越偏石青
     brushScale: 0.04, // 笔触沿等高线方向的频率（1/场景单位）
@@ -50,14 +52,10 @@ export const style = {
     brushStrength: 0.3,
     valleyDarken: 0.3, // 山谷（凹处）压暗
     shoreWidth: 0.22, // 湖岸绿带宽度（watermask B 通道单位，1 = 48 像素 ≈ 450 米）
-    edgeFalloff: 26, // 八边形边缘地形压低过渡宽度（场景单位）
+    edgeFalloff: 18, // 八边形边缘地形压低过渡宽度（场景单位）
     ridge: {
-      interval: 18, // 等高线间隔（米）
-      width: 1.7, // 线宽（像素）
-      minElevation: 45, // 低于此海拔不画
-      convexity: 0.008, // 金线所在的凸度等值（越大越贴近山脊顶、越稀疏）
-      convexitySoft: 0.005,
-      contourMix: 0.35, // 叠加的凸处等高线强度
+      width: 2.0, // 主脊线宽（屏幕像素），弱山脊按强度缩到 0.6 倍
+      minStrength: 0.3, // ridges.png G 通道（山脊强度）低于此值的支脉不画，越大越少
       strength: { day: 0.8, night: 0.4 },
       glow: { day: 0.0, night: 0.55 }, // 夜晚额外发光倍数（颜色乘 1+glow，超过辉光阈值的部分发光）
     },
@@ -80,7 +78,7 @@ export const style = {
     rippleScale: 0.08,
     rippleStrength: { day: 0.015, night: 0.025 },
     shoreTint: 0.55, // 近岸倒影强度
-    moonBand: { power: 1600, strength: 2.4, stretch: 4.0 },
+    moonBand: { width: 0.03, breakFreq: 0.45, strength: 2.6 }, // width：倒影带的角半宽（弧度）；breakFreq：碎光沿带方向的频率
     shoreLights: { strength: 1.1, reach: 0.07, streak: 18.0 }, // 岸灯倒影：reach 为离岸距离（watermask G 通道单位）
   },
 
@@ -91,17 +89,20 @@ export const style = {
     windowFloor: 3.2, // 窗格层高（米）
     windowSpacing: 4.5, // 窗格水平间距（米）
     windowLitRatio: 0.5,
-    windowGlow: 2.6, // 夜晚窗灯亮度（>1 进入辉光）
-    wallGlow: 0.1, // 夜晚墙体整体微光
+    windowGlow: 3.2, // 夜晚窗灯亮度（>1 进入辉光）
+    windowMinPx: 2.5, // 远处每个窗格至少占多少像素（LOD 合并）
+    wallGlow: 0.03, // 夜晚墙体整体微光
   },
 
   roads: {
     width: { trunk: 1.8, primary: 1.6, secondary: 1.2, tertiary: 0.9 } as Record<string, number>,
     lift: 0.35,
     dayOpacity: 0.55,
-    nightOpacity: 0.35,
-    nightMix: 0.22, // 夜晚道路颜色向灯光色混合的比例
-    nightGlow: 0.9,
+    nightOpacity: 0.3,
+    nightMix: 0.16, // 夜晚道路颜色向灯光色混合的比例
+    nightGlow: 0.8,
+    keepClasses: ['trunk', 'primary'], // 这些等级全部保留
+    lakeReach: 0.3, // 其它等级只保留离湖这么近的（watermask B 通道单位，0.3 ≈ 90 米）
   },
 
   shoreLights: {
@@ -116,8 +117,8 @@ export const style = {
   },
 
   base: {
-    rim: 14, // 地形外留边宽度
-    thickness: 62,
+    rim: 10, // 地形外留边宽度
+    thickness: 82,
     chamfer: 0.2, // 切角占短边比例
     topY: 0.1, // 底座顶面高度（与地形边缘相接）
     innerFloorY: -2, // 地形下方的封底高度，必须低于湖底
@@ -132,10 +133,10 @@ export const style = {
 
   camera: {
     fov: 32,
-    position: [0, 900, 1180] as [number, number, number],
-    target: [0, 0, 30] as [number, number, number],
-    minDistance: 140,
-    maxDistance: 2400,
+    position: [0, 700, 910] as [number, number, number],
+    target: [0, 0, 20] as [number, number, number],
+    minDistance: 100,
+    maxDistance: 1600,
     minPitchDeg: 20,
     maxPitchDeg: 75,
     autoRotateSpeed: 0.25,
