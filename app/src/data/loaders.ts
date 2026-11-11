@@ -64,6 +64,31 @@ async function load(): Promise<SceneData> {
   const elevation = new Float32Array(n * n)
   const k = (meta.maxElevation - meta.minElevation) / 65535
   for (let i = 0; i < n * n; i++) elevation[i] = meta.minElevation + src[i * hm.channels] * k
+  // Smooth the DEM gently while keeping the lake floor exactly flat.
+  const smoothed = new Float32Array(elevation.length)
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      const i = y * n + x
+      if (elevation[i] <= meta.waterLevel) {
+        smoothed[i] = elevation[i]
+        continue
+      }
+      let sum = elevation[i] * 4
+      let weight = 4
+      for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
+        if (!ox && !oy) continue
+        const xx = Math.min(n - 1, Math.max(0, x + ox))
+        const yy = Math.min(n - 1, Math.max(0, y + oy))
+        const j = yy * n + xx
+        if (elevation[j] <= meta.waterLevel) continue
+        const w = ox === 0 || oy === 0 ? 2 : 1
+        sum += elevation[j] * w
+        weight += w
+      }
+      smoothed[i] = sum / weight
+    }
+  }
+  elevation.set(smoothed)
   const heightTex = new THREE.DataTexture(elevation, n, n, THREE.RedFormat, THREE.FloatType)
   heightTex.magFilter = heightTex.minFilter = THREE.LinearFilter
   heightTex.wrapS = heightTex.wrapT = THREE.ClampToEdgeWrapping

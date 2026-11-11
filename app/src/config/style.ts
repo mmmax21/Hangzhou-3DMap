@@ -74,9 +74,9 @@ export const style = {
     shoreWidth: 0.22, // 湖岸绿带宽度（watermask B 通道单位，1 = 48 像素 ≈ 450 米）
     edgeFalloff: 18, // 八边形边缘地形压低过渡宽度（场景单位）
     ridge: {
-      width: 2.0, // 主脊线宽（屏幕像素），弱山脊按强度缩到 0.6 倍
+      width: 2.3, // 主脊线宽（屏幕像素），弱山脊按强度缩到 0.6 倍
       minStrength: 0.3, // ridges.png G 通道（山脊强度）低于此值的支脉不画，越大越少
-      strength: { day: 0.8, night: 0.4 },
+      strength: { day: 1.15, night: 0.4 },
       glow: { day: 0.0, night: 0.55 }, // 夜晚额外发光倍数（颜色乘 1+glow，超过辉光阈值的部分发光）
     },
   },
