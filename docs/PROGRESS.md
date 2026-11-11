@@ -122,3 +122,33 @@
 - 湖西的茅家埠、杭州花圃一带是大片低平地，画面上是一片绿和米色，层次少。
 - 夜晚城区灯火比定稿图稀疏，湖面上缺少船只和景点的暖色倒影，这些要等景点模型接入。
 - 白天金线偏淡。定稿图的金线更醒目，可以调 `ridge.strength.day` 和 `width`。
+
+---
+
+## 阶段 6 完成 / 阶段 7 交接（2026-11-11）
+
+### 阶段 6：已完成
+
+按需求顺序逐项实现、截图对比并独立提交：
+
+1. 实例化树林和柳树、导出绿地数据：`fc7f436`。
+2. 山腰云雾及截图校正：`21f75ba`、`7596ada`。
+3. 地形高度适度平滑，增强白天山脊金线：`a3b3b9f`。
+4. 收窄月光带、增加城区灯点、加厚夜间底座：`8133394`。
+5. 扫描 `app/public/models/` 并按清单加载景点 GLB；悬停标签、选择飞行、卡片和点击空白返回：`841ebd3`。当前没有 GLB，所有景点保持可交互占位；加入与 `model` 字段同名的 GLB 后，构建时会发现并接入，加载失败会回退占位。
+6. 底座淡入、地形隆起、建筑和景点错开升起；尊重 reduced-motion。根据屏幕/指针、CPU 核心和设备内存自动选低画质；低画质固定 DPR 1、减半树量、降低地形网格并关闭移轴和纸纹后期。高低档测试参数仅在开发环境通过 `?quality=low|high` 覆盖：`f6d2cfc`。
+
+每一步的并排图在 `docs/screenshots/step1-compare.jpg` 到 `docs/screenshots/step6-compare.jpg`。最终图：`step6-day.jpg`、`step6-night.jpg`、`step6-compare.jpg`。所有可调视觉参数（含平滑核、地形低档网格、入场、画质、紧凑 UI 阈值）集中在 `app/src/config/style.ts`。PRD 色值未作额外变更。
+
+### 验证与已知差距
+
+- `npm --prefix app run build` 通过；JS 主 chunk 约 1.28 MB（gzip 约 373 KB），构建工具仍提示超过 500 KB 的分块警告。发布产物 `app/dist/` 约 3.5 MB。
+- 浏览器高画质统计约 57 calls、1.18M triangles；低画质 37 calls、0.49M triangles，低档满足 PRD 的 80 calls / 50 万面上限。M3 Max 上观察约 120 fps；这不能代替目标手机 30 fps 或 M1 级别 60 fps 验收。
+- 在 390×844 视口检查低画质和雷峰塔选择卡片，列表折叠后没有遮挡卡片；昼夜切换和页面加载通过浏览器检查。
+- 与定稿图仍有明显风格差距：真实 DEM 的山形和绘制的团状树与参考插画不同，夜景城区密度、笔触质感也不完全一致。现有景点模型目录为空，因此景点仍是占位，不宣称模型资产已交付。
+
+### 阶段 7：部署交接
+
+- 已增加 `.github/workflows/pages.yml` 和 `docs/DEPLOYMENT.md`：推送到 `main` 时构建 `/Hangzhou-3DMap/` 子路径版并发布 GitHub Pages，提交为 `a4df884`。`app/vite.config.ts` 支持用 `VITE_BASE_PATH` 配置站点基路径；默认 `/` 供本地预览或域名根路径使用。
+- 用户提供的仓库地址为 `https://github.com/mmmax21/Hangzhou-3DMap.git`。当前 GitHub 连接未建立，不能推送提交或检查 Actions 部署结果；尚无公网验收地址。下一步需在环境中启用 GitHub 网络访问和 Git 凭证，添加 remote 并推送 `main`，在仓库 Settings → Pages 选择 GitHub Actions，再检查 Actions 发布结果及最终站点。
+- 当前 `main` 上阶段 6/Pages 相关本地提交：`f6d2cfc`、`a4df884`。此前阶段逐项提交仍在其历史中。
