@@ -28,6 +28,7 @@ const frag = /* glsl */ `
 ${glslCommon}
 uniform vec3 cBase[2]; uniform vec3 cTop[2]; uniform vec3 cEdge[2];
 uniform float uTopY;
+uniform float uEntrance;
 varying vec3 vPos;
 varying vec3 vNormal;
 void main() {
@@ -44,12 +45,12 @@ void main() {
     float line = 1.0 - smoothstep(fw * 0.8, fw * 2.0, abs(dy - 0.7));
     col = mix(col, DNC(cEdge) * (1.0 + uNight * 1.6), line);
   }
-  gl_FragColor = vec4(col, 1.0);
+  gl_FragColor = vec4(col, uEntrance);
   #include <colorspace_fragment>
 }
 `
 
-export function Base() {
+export function Base({ entrance }: { entrance: { value: number } }) {
   const geometry = useMemo(() => {
     const pts = outline()
     const top = S.topY - 0.02
@@ -88,21 +89,23 @@ export function Base() {
         vertexShader: vert,
         fragmentShader: frag,
         side: THREE.DoubleSide,
+        transparent: true,
         uniforms: {
           ...shared,
           cBase: colorPair(C.base),
           cTop: colorPair(C.baseTop),
           cEdge: colorPair(C.baseEdge),
           uTopY: { value: S.topY },
+          uEntrance: entrance,
         },
       }),
-    [],
+    [entrance],
   )
 
   return (
     <group>
       <mesh geometry={geometry} material={material} />
-      <Nameplate />
+      <Nameplate entrance={entrance} />
     </group>
   )
 }
@@ -168,6 +171,7 @@ function makePlateTexture() {
 const plateFrag = /* glsl */ `
 ${glslCommon}
 uniform sampler2D uTex;
+uniform float uEntrance;
 uniform vec3 cInk[2]; uniform vec3 cSeal[2]; uniform vec3 cEdge[2];
 varying vec2 vUv;
 void main() {
@@ -178,12 +182,12 @@ void main() {
   col = mix(col, DNC(cInk) * (1.0 + uNight * 0.6), t.r); a = max(a, t.r);
   col = mix(col, DNC(cSeal), t.g); a = max(a, t.g);
   if (a < 0.01) discard;
-  gl_FragColor = vec4(col, a);
+  gl_FragColor = vec4(col, a * uEntrance);
   #include <colorspace_fragment>
 }
 `
 
-function Nameplate() {
+function Nameplate({ entrance }: { entrance: { value: number } }) {
   const { material, width, height, z } = useMemo(() => {
     const tex = makePlateTexture()
     const width = 300
@@ -196,13 +200,14 @@ function Nameplate() {
       uniforms: {
         ...shared,
         uTex: { value: tex },
+        uEntrance: entrance,
         cInk: colorPair(C.plateInk),
         cSeal: colorPair(C.seal),
         cEdge: colorPair(C.baseEdge),
       },
     })
     return { material: m, width, height, z: OCT.hz + S.rim + 0.15 }
-  }, [])
+  }, [entrance])
   return (
     <mesh position={[0, S.topY - S.thickness * 0.5, z]} material={material}>
       <planeGeometry args={[width, height]} />

@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { style } from '../config/style'
+import { lowQuality } from '../config/quality'
 import { landmarks, sampleMask, useSceneData } from '../data/loaders'
 import { lngLatToScene, sceneToUV, TERRAIN_D, TERRAIN_W } from '../geo/geo'
 import { lerpColor, uNight } from '../state/night'
@@ -73,6 +74,10 @@ export function Trees() {
       const a=x+(rand()-.5)*T.forestSpacing,b=z+(rand()-.5)*T.forestSpacing
       if(rand()>T.forestProbability||terrainY(d,a,b)>T.maxMountainY)continue
       if(terrainY(d,a,b)>T.minMountainY || polygons.some(p=>a>=p.minX&&a<=p.maxX&&b>=p.minZ&&b<=p.maxZ&&inside(a,b,p.outer)&&!p.holes.some(h=>inside(a,b,h))))add(a,b,false)
+    }
+    if(lowQuality) {
+      const thin=(items:THREE.Matrix4[])=>{const kept=items.filter((_,i)=>Math.floor((i+1)*style.render.lowTreeFraction)>Math.floor(i*style.render.lowTreeFraction));items.splice(0,items.length,...kept)}
+      thin(forest);thin(willows)
     }
     const make=(geometry:THREE.BufferGeometry,matrices:THREE.Matrix4[])=>{
       const mesh=new THREE.InstancedMesh(geometry,new THREE.MeshStandardMaterial({roughness:1}),matrices.length)

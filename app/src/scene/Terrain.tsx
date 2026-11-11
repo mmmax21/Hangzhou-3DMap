@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import { style } from '../config/style'
+import { lowQuality } from '../config/quality'
 import { TERRAIN_D, TERRAIN_W } from '../geo/geo'
 import { useSceneData } from '../data/loaders'
 import { colorPair, numPair, shared } from '../state/night'
@@ -119,8 +120,8 @@ export function Terrain() {
   const d = useSceneData()
 
   const geometry = useMemo(() => {
-    const nx = T.segments
-    const nz = Math.round((T.segments * TERRAIN_D) / TERRAIN_W)
+    const nx = lowQuality ? T.lowSegments : T.segments
+    const nz = Math.round((nx * TERRAIN_D) / TERRAIN_W)
     const pos = new Float32Array((nx + 1) * (nz + 1) * 3)
     for (let j = 0; j <= nz; j++) {
       for (let i = 0; i <= nx; i++) {

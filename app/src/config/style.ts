@@ -59,6 +59,7 @@ export const style = {
     peakCurve: 0.2, // 高处额外加陡：海拔差达到 peakRef 时再乘 1.2
     peakRef: 240,
     segments: 512, // 网格细分（长边），三角面约 2*512*472
+    lowSegments: 224, smoothingWeights: [4, 2, 1] as const,
     // 高程分带（米，海拔）。噪声会扰动分界，形成笔触感的色块
     footTop: 24,
     midTop: 70,
@@ -139,7 +140,7 @@ export const style = {
     clickMaxDrag: 3, markerRadius:2.2, markerHeight:2, markerSegments:16, labelLift:4,
   },
 
-  ui: { background: {day: 'rgba(242,232,213,.9)',night:'rgba(20,23,28,.9)'}, text:{day:'#4a3a28',night:'#e0b050'}, border:{day:'#b8955a',night:'#8a6a30'}, inset:20, width:280, padding:16, fontSize:16, headingSize:22 },
+  ui: { background: {day: 'rgba(242,232,213,.9)',night:'rgba(20,23,28,.9)'}, text:{day:'#4a3a28',night:'#e0b050'}, border:{day:'#b8955a',night:'#8a6a30'}, inset:20, width:280, padding:16, fontSize:16, headingSize:22, compactWidth:620 },
 
   base: {
     rim: 10, // 地形外留边宽度
@@ -181,9 +182,12 @@ export const style = {
 
   transition: { duration: 3 },
 
+  entrance: { duration: 3, baseDuration: .8, terrainStart: .4, terrainDuration: 1.8, objectsStart: 1.4, objectsDuration: 1.3, landmarkStart: 1.8, landmarkDuration: 1.2, initialScale: .001 },
+
   render: {
     maxDpr: 1.5, // PRD 允许最高 2；骨架阶段取 1.5 保帧率，画质分档阶段再按设备调
     msaa: 4,
     tiltShiftSamples: 6,
+    lowDpr: 1, lowMsaa: 0, lowTreeFraction: .5, mobileWidth: 768, lowCpuCores: 4, lowMemoryGb: 4,
   },
 } as const

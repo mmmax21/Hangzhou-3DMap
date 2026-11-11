@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Bloom, EffectComposer, TiltShift2, Vignette } from '@react-three/postprocessing'
 import type { BloomEffect, VignetteEffect } from 'postprocessing'
 import { style } from '../config/style'
+import { lowQuality } from '../config/quality'
 import { lerp, uNight } from '../state/night'
 import { PaperEffect } from './PaperEffect'
 
@@ -22,6 +23,7 @@ export function PostFX() {
     if (vignette.current) vignette.current.darkness = lerp(P.vignette)
     paper.set(P.paper.strength * (1 - t), P.paper.fiber * (1 - t))
   })
+  if (lowQuality) return <EffectComposer multisampling={style.render.lowMsaa} enableNormalPass={false}><Bloom ref={bloom as never} mipmapBlur intensity={P.bloomIntensity.day} luminanceThreshold={P.bloomThreshold.day} luminanceSmoothing={P.bloomSmoothing} /></EffectComposer>
   return (
     <EffectComposer multisampling={style.render.msaa} enableNormalPass={false}>
       <Bloom

@@ -19,7 +19,7 @@ const autoAllowed = !new URLSearchParams(location.search).has('noauto')
 export function CameraRig() {
   const ref = useRef<OrbitControlsImpl>(null!)
   const camera = useThree((s) => s.camera)
-  const lastInput = useRef(-Infinity)
+  const lastInput = useRef(performance.now() / 1000 + style.entrance.duration - Cm.idleResumeSec)
   const selected = useSelection(s => s.selected)
   const data = useSceneData()
   const flight=useRef<gsap.core.Timeline|null>(null)

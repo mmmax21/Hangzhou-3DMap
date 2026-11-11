@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { decode } from 'fast-png'
 import landmarksJson from './landmarks.json'
+import { style } from '../config/style'
 
 export type Landmark = {
   id: string
@@ -73,15 +74,15 @@ async function load(): Promise<SceneData> {
         smoothed[i] = elevation[i]
         continue
       }
-      let sum = elevation[i] * 4
-      let weight = 4
+      let sum = elevation[i] * style.terrain.smoothingWeights[0]
+      let weight: number = style.terrain.smoothingWeights[0]
       for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
         if (!ox && !oy) continue
         const xx = Math.min(n - 1, Math.max(0, x + ox))
         const yy = Math.min(n - 1, Math.max(0, y + oy))
         const j = yy * n + xx
         if (elevation[j] <= meta.waterLevel) continue
-        const w = ox === 0 || oy === 0 ? 2 : 1
+        const w = style.terrain.smoothingWeights[ox === 0 || oy === 0 ? 1 : 2]
         sum += elevation[j] * w
         weight += w
       }
