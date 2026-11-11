@@ -31,3 +31,5 @@ pipeline/cache/
 /scope-basemap.png
 /scope-schematic.svg
 *.tsbuildinfo
+/资产图片/
+/nvm-install.sh

@@ -3,7 +3,6 @@ import { useFrame } from '@react-three/fiber'
 import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { style } from '../config/style'
-import { lowQuality } from '../config/quality'
 import { lngLatToScene } from '../geo/geo'
 import { landmarks, useSceneData, type Landmark } from '../data/loaders'
 import { lerpColor, uNight } from '../state/night'
@@ -22,12 +21,13 @@ function Model({ file, size=L.modelSize }: { file: string; size?:number }) {
     const clone = gltf.scene.clone(true)
     clone.traverse(obj => { if (obj instanceof THREE.Mesh) obj.material = Array.isArray(obj.material) ? obj.material.map(m => m.clone()) : obj.material.clone() })
     clone.traverse(obj=>{if(obj instanceof THREE.Mesh)for(const mat of (Array.isArray(obj.material)?obj.material:[obj.material]))if(mat instanceof THREE.MeshStandardMaterial){
-      mat.roughness=L.modelRoughness;mat.metalness=0
+      mat.roughness=L.modelRoughness;mat.metalness=0;mat.metalnessMap=null;mat.roughnessMap=null;mat.emissiveMap=mat.map
       mat.onBeforeCompile=shader=>{
         shader.uniforms.uModelSaturation={value:L.modelSaturation}
-        shader.fragmentShader='uniform float uModelSaturation;\n'+shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n diffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.2126,0.7152,0.0722))), diffuseColor.rgb, uModelSaturation);')
+        shader.uniforms.uModelGain={value:L.modelGain}
+        shader.fragmentShader='uniform float uModelSaturation;\nuniform float uModelGain;\n'+shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n diffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.2126,0.7152,0.0722))), diffuseColor.rgb, uModelSaturation) * uModelGain;')
       }
-      mat.customProgramCacheKey=()=> 'landmark-desaturation'
+      mat.customProgramCacheKey=()=> 'landmark-grade'
     }})
     const box = new THREE.Box3().setFromObject(clone), dimensions = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3())
     const scale = size / Math.max(dimensions.y, .001)
@@ -56,8 +56,8 @@ function Marker({ item, position, material }: { item: Landmark; position: [numbe
     onPointerOver={e => { e.stopPropagation(); setHover(true); document.body.style.cursor = 'pointer' }}
     onPointerOut={() => { setHover(false); document.body.style.cursor = '' }}
     onClick={e => { e.stopPropagation(); if(e.delta<L.clickMaxDrag)select(item) }}>
-    {file && __MODEL_FILES__.includes(file) && !lowQuality ? <ModelBoundary fallback={placeholder}><Suspense fallback={placeholder}><group rotation={[0,L.rotations[item.id]??0,0]}><Model file={file} size={L.sizes[item.id]}/></group>{item.id==='santan'&&__MODEL_FILES__.includes('santan-stone.glb')&&L.stoneOffsets.map((offset,i)=><group key={i} position={offset}><Model file="santan-stone.glb" size={L.stoneSize}/></group>)}</Suspense></ModelBoundary> : placeholder}
-    {hover && <Html position={[0, sy + L.labelLift, 0]} center className="landmark-label">{item.name}</Html>}
+    {file && __MODEL_FILES__.includes(file) ? <ModelBoundary fallback={placeholder}><Suspense fallback={placeholder}><group rotation={[0,L.rotations[item.id]??0,0]}><Model file={file} size={L.sizes[item.id]}/></group>{item.id==='santan'&&__MODEL_FILES__.includes('santan-stone.glb')&&L.stoneOffsets.map((offset,i)=><group key={i} position={offset}><Model file="santan-stone.glb" size={L.stoneSize}/></group>)}</Suspense></ModelBoundary> : placeholder}
+    {hover && <Html position={[0, (L.sizes[item.id] ?? sy) + L.labelLift, 0]} center className="landmark-label">{item.name}</Html>}
   </group></group>
 }
 export function Landmarks() {

@@ -32,26 +32,30 @@ export const style = {
     seal: { day: '#B5352A', night: '#B5352A' },
     plateInk: { day: '#4A3A28', night: '#C9A15A' }, // 新增：铭牌文字
     mist: { day: '#F4EEE2', night: '#253035' },
-    willow: { day: '#A9B04F', night: '#4C512F' },
-    forest: { day: '#575932', night: '#1E2A22' },
+    willow: { day: '#B9C766', night: '#5A6335' }, // 比 PRD 的 #A9B04F 亮：受光后才接近定稿图的柳色
+    forest: { day: '#7FA862', night: '#24332A' }, // PRD 的 #575932 受光后近黑，盖住青绿山体，改为石绿系
     trunk: { day: '#826B43', night: '#302C22' },
-    placeholder: { day: '#B5352A', night: '#6A2A22' }, // 新增：景点占位方块
+    placeholder: { day: '#DDD2BC', night: '#3A3A3A' }, // 模型加载中或加载失败时的占位，用石色，不再用红色
   },
 
   trees: {
-    seed: 137, forestSpacing: 7.5, forestProbability: 0.78,
-    shoreSpacing: 7, dikeSpacing: 6, shoreOffset: 2.2,
-    crownRadius: 3.4, crownHeight: 3.5, trunkHeight: 3.2,
-    willowHeight: 6.2, willowRadius: 2.5, variation: 0.32,
-    minMountainY: 7, maxMountainY: 105, edgeMargin: 12,
-    landmarkClearance: 8, nightGlow: 0.08,
-    crownSegments: 7, crownRings: 5,
+    // 1 单位 = 10 米。树高约 3 到 4 个单位，景点高 12 到 34，树不能比景点大
+    seed: 137, forestSpacing: 4.6, forestProbability: 0.8,
+    shoreSpacing: 4.2, dikeSpacing: 3.6, shoreOffset: 1.5,
+    crownRadius: 1.7, crownHeight: 1.8, trunkHeight: 1.3,
+    willowHeight: 3.2, willowRadius: 1.3, variation: 0.3,
+    minMountainY: 7, edgeMargin: 12,
+    footMaxY: 30, // 山上的树只长到这个高度，再往上露出青绿山体和金线
+    footFade: 1.6, // 越大，树越集中在山脚
+    tint: 0.16, // 每棵树的明暗随机幅度
+    landmarkClearance: 15, nightGlow: 0.08,
+    crownSegments: 6, crownRings: 4,
   },
 
   mist: {
-    grid: 65, minY: 12, maxY: 65, lift: 4, width: 115, height: 15,
-    opacity: { day: 0.34, night: 0.25 }, drift: 0.8, noiseScale: 5,
-    edgeMargin: 35, landmarkClearance: 25,
+    grid: 46, minY: 14, maxY: 80, lift: 7, width: 105, height: 24,
+    opacity: { day: 0.6, night: 0.4 }, drift: 0.8, noiseScale: 4,
+    edgeMargin: 60, landmarkClearance: 30,
   },
 
   terrain: {
@@ -105,7 +109,7 @@ export const style = {
 
   buildings: {
     sink: 1.5, // 向地下延伸，避免坡地悬空（场景单位）
-    clearRadius: 12, // 景点周围清空建筑的半径（场景单位）
+    clearRadius: 17, // 景点周围清空建筑的半径（场景单位）
     towerHeight: 40, // 高于此（米）视为高楼，降饱和
     windowFloor: 3.2, // 窗格层高（米）
     windowSpacing: 4.5, // 窗格水平间距（米）
@@ -134,12 +138,13 @@ export const style = {
 
   landmarks: {
     placeholderSize: [7, 12, 7] as [number, number, number],
-    nightGlow: 1.8,
+    nightGlow: 1.15, // 夜晚自发光强度，发光跟随贴图，保留屋檐和柱子的明暗
     modelSize: 22, hoverLift: 3, hoverDamping:10, flightDuration: 1.5,
-    modelSaturation: .55, modelRoughness: .9,
-    sizes: { leifeng:17.9, baochu:10.4, duanqiao:12, huxinting:7, santan:7, quyuan:8, huagang:8, yuewang:9, sudi:7 } as Record<string,number>,
+    modelSaturation: .82, modelGain: 1.22, modelRoughness: .9,
+    // 模型高度（场景单位）。为了在全景里看得见，比真实比例夸张得多：塔约 4 到 5 倍，亭和殿更大
+    sizes: { leifeng:34, baochu:27, duanqiao:9, huxinting:14, santan:13, quyuan:13, huagang:9.5, yuewang:15, sudi:6 } as Record<string,number>,
     rotations: { duanqiao:-.65, sudi:1.4 } as Record<string,number>,
-    stoneSize: .7, stoneOffsets: [[-10,0,24],[0,0,31],[10,0,24]] as [number,number,number][],
+    stoneSize: 4, stoneOffsets: [[-11,0,20],[0,0,28],[11,0,20]] as [number,number,number][],
     flightOffset: [0, 75, 115] as [number, number, number],
     clickMaxDrag: 3, markerRadius:2.2, markerHeight:2, markerSegments:16, labelLift:4,
   },
@@ -192,6 +197,6 @@ export const style = {
     maxDpr: 1.5, // PRD 允许最高 2；骨架阶段取 1.5 保帧率，画质分档阶段再按设备调
     msaa: 4,
     tiltShiftSamples: 6,
-    lowDpr: 1, lowMsaa: 0, lowTreeFraction: .5, mobileWidth: 768, lowCpuCores: 4, lowMemoryGb: 4,
+    lowDpr: 1, lowMsaa: 0, lowTreeFraction: .3, mobileWidth: 768, lowCpuCores: 4, lowMemoryGb: 4,
   },
 } as const

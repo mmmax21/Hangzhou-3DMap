@@ -19,7 +19,7 @@ function inside(x:number,z:number,r:number[][]) {
 }
 function crown(willow:boolean) {
   const parts:THREE.BufferGeometry[]=[]
-  const count=willow?7:4
+  const count=willow?5:3
   for(let i=0;i<count;i++) {
     const angle=i*Math.PI*2/count
     const g=new THREE.SphereGeometry(1,T.crownSegments,T.crownRings)
@@ -72,8 +72,12 @@ export function Trees() {
     }
     for(let x=-TERRAIN_W/2;x<TERRAIN_W/2;x+=T.forestSpacing)for(let z=-TERRAIN_D/2;z<TERRAIN_D/2;z+=T.forestSpacing){
       const a=x+(rand()-.5)*T.forestSpacing,b=z+(rand()-.5)*T.forestSpacing
-      if(rand()>T.forestProbability||terrainY(d,a,b)>T.maxMountainY)continue
-      if(terrainY(d,a,b)>T.minMountainY || polygons.some(p=>a>=p.minX&&a<=p.maxX&&b>=p.minZ&&b<=p.maxZ&&inside(a,b,p.outer)&&!p.holes.some(h=>inside(a,b,h))))add(a,b,false)
+      const y=terrainY(d,a,b)
+      if(rand()>T.forestProbability||y>T.footMaxY)continue
+      // 山上只在山脚成林，越高越稀；平地上只种在绿地范围内
+      const keep=y>T.minMountainY?Math.pow(1-(y-T.minMountainY)/(T.footMaxY-T.minMountainY),T.footFade):1
+      if(rand()>keep)continue
+      if(y>T.minMountainY || polygons.some(p=>a>=p.minX&&a<=p.maxX&&b>=p.minZ&&b<=p.maxZ&&inside(a,b,p.outer)&&!p.holes.some(h=>inside(a,b,h))))add(a,b,false)
     }
     if(lowQuality) {
       const thin=(items:THREE.Matrix4[])=>{const kept=items.filter((_,i)=>Math.floor((i+1)*style.render.lowTreeFraction)>Math.floor(i*style.render.lowTreeFraction));items.splice(0,items.length,...kept)}
@@ -81,7 +85,9 @@ export function Trees() {
     }
     const make=(geometry:THREE.BufferGeometry,matrices:THREE.Matrix4[])=>{
       const mesh=new THREE.InstancedMesh(geometry,new THREE.MeshStandardMaterial({roughness:1}),matrices.length)
-      matrices.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();return mesh
+      const tint=new THREE.Color()
+      matrices.forEach((m,i)=>{mesh.setMatrixAt(i,m);const f=Math.sin(i*12.9898)*43758.5453,k=1+(f-Math.floor(f)-.5)*2*T.tint;mesh.setColorAt(i,tint.setRGB(k,k,k))})
+      mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;mesh.computeBoundingSphere();return mesh
     }
     const trunks=new THREE.CylinderGeometry(T.crownRadius*.1,T.crownRadius*.14,T.trunkHeight,5).translate(0,T.trunkHeight/2,0)
     console.info(`[trees] forest=${forest.length}, willows=${willows.length}; 3 instanced draws`)
