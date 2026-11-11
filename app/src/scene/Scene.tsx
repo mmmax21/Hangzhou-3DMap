@@ -11,14 +11,17 @@ import { Mist } from './Mist'
 import { Trees } from './Trees'
 import { Water } from './Water'
 import { BenchHook, Perf, ShotHook } from './Perf'
+import { useSelection } from '../state/selection'
 
 export function Scene() {
+  const select=useSelection(s=>s.select)
   return (
     <>
       <Atmosphere />
-      <CameraRig />
       <Base />
       <Suspense fallback={null}>
+        <CameraRig />
+        <group onClick={e=>{if(e.delta<3)select(null)}}>
         <Terrain />
         <Water />
         <Buildings />
@@ -26,6 +29,7 @@ export function Scene() {
         <ShoreLights />
         <Trees />
         <Mist />
+        </group>
         <Landmarks />
       </Suspense>
       <PostFX />

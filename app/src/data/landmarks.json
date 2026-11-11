@@ -6,7 +6,7 @@
     "lng": 120.14703,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "西湖北端的石拱桥，与白堤相接，是断桥残雪景观所在。",
     "model": "duanqiao.glb"
   },
   {
@@ -16,7 +16,7 @@
     "lng": 120.144034,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "连接断桥与孤山的湖上长堤，堤上桃柳相伴，适合步行观湖。",
     "model": null
   },
   {
@@ -26,7 +26,7 @@
     "lng": 120.134592,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "贯穿西湖南北的长堤，沿线六桥相连，两侧可赏湖光山色。",
     "model": null
   },
   {
@@ -36,7 +36,7 @@
     "lng": 120.145015,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "坐落于西湖南岸夕照山，登塔可远眺湖山。",
     "model": "leifeng.glb"
   },
   {
@@ -46,7 +46,7 @@
     "lng": 120.140675,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "西湖中的标志性景观，水中三座石塔与湖月相映。",
     "model": "santan.glb"
   },
   {
@@ -56,7 +56,7 @@
     "lng": 120.139663,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "位于西湖水域中的小岛，亭阁四面临水，可望湖山。",
     "model": "huxinting.glb"
   },
   {
@@ -66,7 +66,7 @@
     "lng": 120.143375,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "位于宝石山上的古塔，秀长塔身与山石共同构成北岸天际线。",
     "model": "baochu.glb"
   },
   {
@@ -76,7 +76,7 @@
     "lng": 120.130985,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "西湖西北岸的赏荷胜地，园中水面与亭榭相间。",
     "model": "quyuan.glb"
   },
   {
@@ -86,7 +86,7 @@
     "lng": 120.137392,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "苏堤南端附近的园林，以花木、水景与观鱼景观相映。",
     "model": "huagang.glb"
   },
   {
@@ -96,7 +96,7 @@
     "lng": 120.129822,
     "poem": "",
     "poemSource": "",
-    "intro": "",
+    "intro": "西湖北岸纪念岳飞的场所，背山面湖，庄严肃穆。",
     "model": "yuewang.glb"
   }
 ]

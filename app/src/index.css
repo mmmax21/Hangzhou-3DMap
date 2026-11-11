@@ -25,3 +25,11 @@ body { background: #c9ae96; font-family: var(--font-serif); }
   position: absolute; top: 8px; left: 8px; padding: 4px 8px;
   font: 12px/1.4 ui-monospace, monospace; color: #fff; background: rgba(0, 0, 0, 0.55); border-radius: 4px;
 }
+.landmark-list,.landmark-card,.landmark-label { color: var(--panel-fg); background: var(--panel-bg); border: 1px solid var(--panel-line); font:var(--panel-font) var(--font-serif); }
+.landmark-list { position:absolute; left:var(--panel-inset); bottom:var(--panel-inset); padding:var(--panel-padding); max-width:min(var(--panel-width), calc(100vw - 2 * var(--panel-inset))); }
+.landmark-list button,.landmark-card button { color:inherit; background:transparent; border:0; font:inherit; cursor:pointer; padding:6px 9px; }
+.landmark-items { display:flex; flex-wrap:wrap; }
+.landmark-items button[aria-pressed=true] { text-decoration:underline; }
+.landmark-card { position:absolute; right:var(--panel-inset); bottom:var(--panel-inset); width:min(var(--panel-width), calc(100vw - 2 * var(--panel-inset))); padding:var(--panel-padding); }
+.landmark-card h2 { margin:0 30px 8px 0; font-size:var(--panel-heading); }.landmark-card p { margin:0; line-height:1.7; }.landmark-card .close { position:absolute; right:8px; top:6px; font-size:var(--panel-heading); }
+.landmark-label { white-space:nowrap; padding:4px 8px; pointer-events:none; }

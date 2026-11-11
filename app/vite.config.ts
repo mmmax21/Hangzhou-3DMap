@@ -31,5 +31,6 @@ function screenshotSaver(): Plugin {
 
 export default defineConfig({
   plugins: [react(), screenshotSaver()],
+  define: { __MODEL_FILES__: JSON.stringify(fs.existsSync(path.resolve(__dirname, 'public/models')) ? fs.readdirSync(path.resolve(__dirname, 'public/models')).filter(f => f.endsWith('.glb')) : []) },
   server: { port: 5173, strictPort: true },
 })

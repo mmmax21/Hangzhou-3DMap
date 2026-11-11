@@ -134,7 +134,12 @@ export const style = {
   landmarks: {
     placeholderSize: [7, 12, 7] as [number, number, number],
     nightGlow: 1.8,
+    modelSize: 22, hoverLift: 3, hoverDamping:10, flightDuration: 1.5,
+    flightOffset: [0, 75, 115] as [number, number, number],
+    clickMaxDrag: 3, markerRadius:2.2, markerHeight:2, markerSegments:16, labelLift:4,
   },
+
+  ui: { background: {day: 'rgba(242,232,213,.9)',night:'rgba(20,23,28,.9)'}, text:{day:'#4a3a28',night:'#e0b050'}, border:{day:'#b8955a',night:'#8a6a30'}, inset:20, width:280, padding:16, fontSize:16, headingSize:22 },
 
   base: {
     rim: 10, // 地形外留边宽度
