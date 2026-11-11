@@ -1,0 +1,32 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+.vite/
+__pycache__/
+*.pyc
+
+# 原始资产（图像模型与 Tripo 输出），体积大，不入库
+assets-raw/
+
+# 下载的原始地理数据
+pipeline/cache/
+*.tif
+
+# 旧内容：保留在磁盘上，不入库，新方案不依赖
+/web/
+/scripts/
+/data/
+/geography/
+/output/
+/qgis/
+/build_scope_map.py
+/hangzhou-osm.json
+/hangzhou-osm-recovered.json
+/*.overpass
+/product-framework.md
+/scope-basemap.pgw
+/scope-basemap.png
+/scope-schematic.svg
