@@ -5,6 +5,7 @@ import { Scene } from './scene/Scene'
 import { NightToggle } from './ui/NightToggle'
 import { TourOverlay, TourToggle } from './ui/Tour'
 import { LoadingCover, TitleMark } from './ui/Chrome'
+import { SoundToggle } from './ui/SoundToggle'
 import { useTour } from './state/tour'
 import { useNight } from './state/night'
 import { useSelection } from './state/selection'
@@ -41,6 +42,7 @@ export function App() {
       <TitleMark />
       <NightToggle />
       <TourToggle />
+      <SoundToggle />
       <TourOverlay />
       <style>{`@media (max-width:${ui.compactWidth}px) { .landmark-list.has-selection .landmark-items { display:none; } .landmark-list.has-selection { bottom:auto; top:var(--panel-inset); } }`}</style>
       {!touring && <div className={`landmark-list ${selected ? 'has-selection' : ''}`}><button className="list-head" onClick={() => setOpen(!open)} aria-expanded={open}>景点<i>{open ? '收起' : '展开'}</i></button>{open && <div className="landmark-items">{landmarks.map(item => <button key={item.id} onClick={() => select(item)} aria-pressed={selected?.id === item.id}>{item.name}</button>)}</div>}</div>}

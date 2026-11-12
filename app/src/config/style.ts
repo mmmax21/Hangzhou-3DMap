@@ -191,6 +191,25 @@ export const style = {
     dpr: [1.5, 1.25, 1] as readonly number[], // 各档的像素比上限
   },
 
+  // 合成声音，见 audio/engine.ts。音量都是 0 到 1 的线性增益
+  audio: {
+    master: 0.8, fade: 2.5,
+    reverb: { seconds: 3.2, decay: 2.6, mix: 0.32 },
+    water: { volume: 0.085 },
+    wind: { volume: 0.03 },
+    birds: { volume: 0.035, gap: [1.6, 6.5] as readonly [number, number] }, // gap：两次鸟鸣之间的秒数范围
+    crickets: { volume: 0.014, gap: [0.5, 1.4] as readonly [number, number] },
+    chime: { freq: 587.33, volume: 0.07 }, // 导览每站的磬声，D5
+    melody: {
+      root: 146.83, // D3
+      ratios: [1, 9 / 8, 5 / 4, 3 / 2, 5 / 3] as readonly number[], // 宫商角徵羽
+      octaves: 2, volume: 0.11,
+      note: [1.3, 3.4] as readonly [number, number], // 相邻两音的间隔
+      rest: 0.22, pause: [3.5, 6.5] as readonly [number, number], // 留白的概率和时长
+      harmony: 0.22, nightSlow: 0.35,
+    },
+  },
+
   tour: {
     fly: 3.2, // 两站之间飞行的秒数
     dwell: 6.2, // 每站停留的秒数，期间镜头缓推
