@@ -4,6 +4,7 @@ import { style } from './config/style'
 import { Scene } from './scene/Scene'
 import { NightToggle } from './ui/NightToggle'
 import { TourOverlay, TourToggle } from './ui/Tour'
+import { LoadingCover, TitleMark } from './ui/Chrome'
 import { useTour } from './state/tour'
 import { useNight } from './state/night'
 import { useSelection } from './state/selection'
@@ -37,12 +38,14 @@ export function App() {
       >
         <Scene />
       </Canvas>
+      <TitleMark />
       <NightToggle />
       <TourToggle />
       <TourOverlay />
       <style>{`@media (max-width:${ui.compactWidth}px) { .landmark-list.has-selection .landmark-items { display:none; } .landmark-list.has-selection { bottom:auto; top:var(--panel-inset); } }`}</style>
-      {!touring && <div className={`landmark-list ${selected ? 'has-selection' : ''}`}><button onClick={() => setOpen(!open)} aria-expanded={open}>景点 {open ? '−' : '+'}</button>{open && <div className="landmark-items">{landmarks.map(item => <button key={item.id} onClick={() => select(item)} aria-pressed={selected?.id === item.id}>{item.name}</button>)}</div>}</div>}
-      {selected && <article className="landmark-card"><button className="close" aria-label="关闭景点卡片" onClick={() => select(null)}>×</button><h2>{selected.name}</h2><p>{selected.intro || `${selected.name}，西湖风景名胜区景点。`}</p>{selected.poem && <p>{selected.poem}<br />{selected.poemSource}</p>}</article>}
+      {!touring && <div className={`landmark-list ${selected ? 'has-selection' : ''}`}><button className="list-head" onClick={() => setOpen(!open)} aria-expanded={open}>景点<i>{open ? '收起' : '展开'}</i></button>{open && <div className="landmark-items">{landmarks.map(item => <button key={item.id} onClick={() => select(item)} aria-pressed={selected?.id === item.id}>{item.name}</button>)}</div>}</div>}
+      {selected && <article className="landmark-card" key={selected.id}><button className="close" aria-label="关闭景点卡片" onClick={() => select(null)}>×</button><h2>{selected.name}</h2><p className="card-intro">{selected.intro || `${selected.name}，西湖风景名胜区景点。`}</p>{selected.poem && <p className="card-poem">{selected.poem}<span>{selected.poemSource}</span></p>}</article>}
+      <LoadingCover />
       {params.has('stats') && <div id="perf" className="perf" />}
     </div>
   )

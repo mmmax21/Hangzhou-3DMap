@@ -20,6 +20,7 @@ import { intro } from '../state/intro'
 import { TourDirector } from './TourDirector'
 import { AdaptiveQuality } from './AdaptiveQuality'
 import { usePerfTier } from '../state/perf'
+import { useReady } from '../state/ready'
 import { Weather } from './Weather'
 import { BenchHook, Perf, ShotHook } from './Perf'
 import { useSelection } from '../state/selection'
@@ -47,6 +48,7 @@ function Entrance({select}:{select: ReturnType<typeof useSelection.getState>['se
   const opacity=useMemo(()=>({value:1}),[])
   const tier=usePerfTier(s=>s.tier)
   useLayoutEffect(()=>{
+    useReady.getState().markReady() // 走到这里说明数据已加载，加载画面可以退场
     if(matchMedia('(prefers-reduced-motion: reduce)').matches)return
     const e=style.entrance
     const timeline=gsap.timeline()

@@ -64,3 +64,77 @@ body { background: #c9ae96; font-family: var(--font-serif); }
   font-size: 13px; letter-spacing: .3em; color: var(--panel-fg); opacity: .55; white-space: nowrap;
 }
 @media (max-width: 620px) { .tour-text { right: 5vw; top: 12vh; } .tour-hint { font-size: 11px; } }
+
+/* ---------------------------------------------------------------- 界面排版 */
+:root { --font-kai: 'Kaiti SC', 'STKaiti', 'KaiTi', 'Songti SC', serif; --seal: #b5352a; }
+
+/* 加载封面 */
+.cover {
+  position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 42%, #f4ead6 0%, #e9dcc2 55%, #d9c6a6 100%);
+  transition: opacity 1.5s ease; color: #33271a;
+}
+.cover.leaving { opacity: 0; pointer-events: none; }
+.cover-title { writing-mode: vertical-rl; white-space: nowrap; }
+.cover-name { font-family: var(--font-kai); font-size: clamp(64px, 11vw, 132px); letter-spacing: .12em; line-height: 1; }
+.cover-sub { font-size: clamp(13px, 1.3vw, 17px); letter-spacing: .5em; padding-top: .4em; margin-block-start: clamp(10px, 1.4vw, 18px); }
+.cover-sub em { font-style: normal; opacity: .7; }
+.cover-seal, .title-mark-seal {
+  writing-mode: vertical-rl; font-family: var(--font-serif); color: #f6ead6; background: var(--seal);
+  border-radius: 3px; letter-spacing: .08em; line-height: 1.1;
+}
+.cover-seal { display: inline-block; font-size: 13px; padding: 7px 4px; margin-top: 1.4em; letter-spacing: .08em; }
+.cover-status {
+  position: absolute; bottom: 9vh; left: 50%; transform: translateX(-50%); font-size: 13px; letter-spacing: .6em; opacity: .55;
+  animation: cover-pulse 2.4s ease-in-out infinite;
+}
+@keyframes cover-pulse { 0%, 100% { opacity: .25 } 50% { opacity: .7 } }
+
+/* 左上角题签 */
+.title-mark {
+  position: absolute; top: 20px; left: 22px; writing-mode: vertical-rl; white-space: nowrap;
+  pointer-events: none; color: var(--ui-day-fg); text-shadow: 0 0 10px rgba(255, 248, 232, .9); transition: color 3s ease;
+}
+.is-night .title-mark { color: #f1dca8; text-shadow: 0 0 12px rgba(0, 0, 0, .9); }
+.title-mark-name { font-family: var(--font-kai); font-size: clamp(26px, 2.6vw, 38px); letter-spacing: .14em; line-height: 1; }
+.title-mark-seal { display: inline-block; font-size: 11px; padding: 5px 3px; margin-top: 8px; vertical-align: top; }
+.perf { top: auto; bottom: 8px; left: 50%; transform: translateX(-50%); }
+
+/* 景点列表：去掉厚重的底板，改成一条细线下的一排名字 */
+.landmark-list {
+  background: linear-gradient(to right, var(--panel-bg), transparent); border: 0; border-top: 1px solid var(--panel-line);
+  padding: 10px 28px 10px 14px; max-width: min(560px, calc(100vw - 2 * var(--panel-inset)));
+  backdrop-filter: blur(3px); transition: color 3s ease;
+}
+.landmark-list .list-head { font-family: var(--font-kai); font-size: 20px; letter-spacing: .3em; padding-left: 4px; }
+.landmark-list .list-head i { font-style: normal; font-family: var(--font-serif); font-size: 12px; letter-spacing: .2em; opacity: .5; margin-left: 4px; }
+.landmark-items { gap: 0 2px; margin-top: 2px; }
+.landmark-items button { letter-spacing: .12em; opacity: .82; transition: opacity .2s ease; }
+.landmark-items button:hover { opacity: 1; }
+.landmark-items button[aria-pressed=true] { text-decoration: none; opacity: 1; box-shadow: inset 0 -2px 0 var(--seal); }
+
+/* 景点卡片 */
+.landmark-card {
+  border: 0; border-left: 2px solid var(--seal); padding: 18px 20px 18px 22px; backdrop-filter: blur(6px);
+  width: min(340px, calc(100vw - 2 * var(--panel-inset))); animation: card-in .7s ease both;
+}
+@keyframes card-in { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+.landmark-card h2 { font-family: var(--font-kai); font-weight: 400; font-size: 30px; letter-spacing: .2em; margin: 0 30px 10px 0; }
+.landmark-card .card-intro { line-height: 1.9; letter-spacing: .04em; text-align: justify; }
+.landmark-card .card-poem { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--panel-line); font-family: var(--font-kai); font-size: 18px; letter-spacing: .12em; line-height: 1.8; }
+.landmark-card .card-poem span { display: block; font-family: var(--font-serif); font-size: 12px; letter-spacing: .15em; opacity: .65; }
+.landmark-card .close { opacity: .6; }
+.landmark-label { border: 0; border-bottom: 1px solid var(--seal); letter-spacing: .2em; background: var(--panel-bg); }
+
+/* 导览诗句的底衬：一团柔和的纸色（夜晚是墨色），让字在杂乱背景上也读得清 */
+.tour-text::before {
+  content: ''; position: absolute; inset: -9vh -7vw; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse at 55% 42%, rgba(244, 234, 214, .78) 0%, rgba(244, 234, 214, .45) 38%, rgba(244, 234, 214, 0) 70%);
+  transition: opacity 2s ease;
+}
+.is-night .tour-text::before { background: radial-gradient(ellipse at 55% 42%, rgba(8, 12, 20, .72) 0%, rgba(8, 12, 20, .4) 38%, rgba(8, 12, 20, 0) 70%); }
+
+@media (max-width: 620px) {
+  .title-mark { top: 14px; left: 14px; }
+  .tour-toggle { right: 78px; padding: 0 14px; font-size: 16px; }
+}
