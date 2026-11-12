@@ -19,7 +19,7 @@ export const shared = {
   uMoonDir: { value: new THREE.Vector3(0, 0.3, -1) },
 }
 
-type NightStore = { isNight: boolean; toggle: () => void; set: (night: boolean, instant?: boolean) => void }
+type NightStore = { isNight: boolean; toggle: () => void; set: (night: boolean, instant?: boolean) => void; level: (value: number, duration: number) => void }
 
 export const useNight = create<NightStore>((setState, get) => ({
   isNight: false,
@@ -29,6 +29,12 @@ export const useNight = create<NightStore>((setState, get) => ({
     gsap.killTweensOf(uNight)
     if (instant) uNight.value = night ? 1 : 0
     else gsap.to(uNight, { value: night ? 1 : 0, duration: style.transition.duration, ease: 'sine.inOut' })
+  },
+  // 导览用：过渡到任意中间值，例如黄昏
+  level: (value, duration) => {
+    setState({ isNight: value > 0.5 })
+    gsap.killTweensOf(uNight)
+    gsap.to(uNight, { value, duration, ease: 'sine.inOut' })
   },
 }))
 

@@ -10,6 +10,7 @@ import { lngLatToScene } from '../geo/geo'
 import { useSceneData } from '../data/loaders'
 import { terrainY } from './terrainHeight'
 import gsap from 'gsap'
+import { useTour } from '../state/tour'
 
 const Cm = style.camera
 const deg = Math.PI / 180
@@ -25,6 +26,9 @@ export function CameraRig() {
   const flight=useRef<gsap.core.Timeline|null>(null)
   const initial=useRef(true)
   const introTween=useRef<gsap.core.Tween|null>(null)
+  const touring=useTour(s=>s.active)
+  // 导览开始时，开场运镜和景点飞行都让位
+  useEffect(()=>{ if(touring){ introTween.current?.kill(); flight.current?.kill() } },[touring])
 
   useEffect(() => {
     camera.position.set(...Cm.position)
@@ -39,10 +43,13 @@ export function CameraRig() {
       if (import.meta.env.DEV) (window as unknown as Record<string, unknown>).__introCam = introTween.current
     }
     ;(window as unknown as Record<string, unknown>).__controls = ref.current
+    // 组件重新挂载时必须停掉旧的运镜，否则会有一个停不下来的动画一直抢镜头
+    return () => { introTween.current?.kill() }
   }, [camera])
 
   useEffect(() => {
     if(initial.current&&!selected){initial.current=false;return}
+    if(useTour.getState().active)return // 导览自己管镜头
     const c = ref.current
     if (!c) return
     const [x,z] = selected ? lngLatToScene(selected.lng, selected.lat) : [Cm.target[0], Cm.target[2]]
@@ -63,7 +70,7 @@ export function CameraRig() {
     t.x = THREE.MathUtils.clamp(t.x, -OCT.hx, OCT.hx)
     t.z = THREE.MathUtils.clamp(t.z, -OCT.hz, OCT.hz)
     t.y = Math.max(t.y, 0)
-    c.autoRotate = autoAllowed && !selected && !flight.current?.isActive() && performance.now() / 1000 - lastInput.current > Cm.idleResumeSec
+    c.autoRotate = autoAllowed && !selected && !useTour.getState().active && !flight.current?.isActive() && performance.now() / 1000 - lastInput.current > Cm.idleResumeSec
   })
 
   return (
@@ -79,7 +86,7 @@ export function CameraRig() {
       maxPolarAngle={(90 - Cm.minPitchDeg) * deg}
       autoRotateSpeed={Cm.autoRotateSpeed}
       screenSpacePanning={false}
-      onStart={() => {introTween.current?.kill();flight.current?.kill();lastInput.current = Infinity}}
+      onStart={() => {useTour.getState().touch();useTour.getState().stop();introTween.current?.kill();flight.current?.kill();lastInput.current = Infinity}}
       onEnd={() => (lastInput.current = performance.now() / 1000 - 0)}
     />
   )

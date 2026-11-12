@@ -15,7 +15,8 @@ export const style = {
     water: { day: '#D9E4D3', night: '#1C3648' },
     waterDeep: { day: '#CADDD2', night: '#13283A' },
     waterShore: { day: '#93B48A', night: '#203C48' }, // 近岸倒影色
-    waterFar: { day: '#F3EFE2', night: '#2A4658' }, // 远处水面泛天光
+    waterFar: { day: '#F3EFE2', night: '#2A4658' }, // 远处水面泛天光（只在没有真实倒影的低画质档使用）
+    sunGlint: { day: '#FFF7E4', night: '#000000' }, // 白天波光
     mountainHigh: { day: '#2F6F8F', night: '#0A1E26' },
     mountainHigh2: { day: '#4C787E', night: '#0D2229' },
     mountainMid: { day: '#7AA67D', night: '#1F2923' },
@@ -103,8 +104,16 @@ export const style = {
   },
 
   water: {
-    rippleScale: 0.08,
-    rippleStrength: { day: 0.015, night: 0.025 },
+    rippleScale: 0.11,
+    rippleSpeed: 0.11,
+    rippleStrength: { day: 0.05, night: 0.09 },
+    // 真实倒影（高画质）
+    reflect: { day: 0.82, night: 0.95 }, // 倒影总强度
+    reflectBase: 0.2, // 垂直俯视时的倒影比例，越大水越像镜子
+    distort: 0.55, // 波纹对倒影的扰动
+    stretch: 0.012, // 倒影沿竖直方向拉长的幅度
+    reflectResolution: 0.5, // 倒影贴图相对画面的分辨率
+    glint: 0.9, glintPower: 220, // 白天波光的强度和集中程度
     shoreTint: 0.6, // 近岸倒影强度
     farTint: 0.75, // 掠射角处水面泛天光的强度
     moonBand: { width: 0.016, breakFreq: 0.45, strength: 2.6 }, // width：倒影带的角半宽（弧度）；breakFreq：碎光沿带方向的频率
@@ -143,7 +152,8 @@ export const style = {
   landmarks: {
     placeholderSize: [7, 12, 7] as [number, number, number],
     nightGlow: 1.15, // 夜晚自发光强度，发光跟随贴图，保留屋檐和柱子的明暗
-    modelSize: 22, hoverLift: 3, hoverDamping:10, flightDuration: 1.5,
+    modelSize: 22, hoverLift: 0, // 悬停时不再上浮，只显示名称
+    hoverDamping:10, flightDuration: 1.5,
     modelSaturation: .82, modelGain: 1.22, modelRoughness: .9,
     shadowScale: .62, shadowOpacity: .38, shadowOffset: [.25, -.12] as [number, number], // 接触阴影：半径相对模型高度，偏向背光一侧
     // 模型高度（场景单位）。为了在全景里看得见，比真实比例夸张得多：塔约 4 到 5 倍，亭和殿更大
@@ -173,6 +183,20 @@ export const style = {
     ridgeBase: 0.015, ridgeStep: 0.03, ridgeHeight: 0.11, hazeDepth: 0.07,
   },
 
+  tour: {
+    fly: 3.2, // 两站之间飞行的秒数
+    dwell: 6.2, // 每站停留的秒数，期间镜头缓推
+    textLead: 0.6, // 诗句在镜头到位前多久开始浮现
+    overviewPush: 0.07, // 全景站缓推的比例
+    autoDelay: 2.5, // 开场结束后多久自动开始导览
+  },
+
+  weather: {
+    count: 1600, radius: 150, height: 130, opacity: 0.9, maxPx: 9, // maxPx：粒子在屏幕上的最大像素，避免贴近镜头的那几粒过大
+    snowSpeed: 9, snowSway: 2.2, snowSize: 1.3, snowColor: '#FFFFFF',
+    petalSpeed: 6, petalSway: 4.5, petalSize: 1.4, petalColor: '#F7C6CF',
+  },
+
   skyLanterns: { count: 80, radius: 250, rise: 330, speed: 0.022, sway: 5, drift: 30, size: 5.5, glow: 2.4 },
 
   boats: {
@@ -198,9 +222,9 @@ export const style = {
     // 主镜头：从湖东岸向西看，雷峰塔在左前，群山作背景，城区落在镜头之外
     position: [455, 150, 175] as [number, number, number],
     target: [-75, 22, -15] as [number, number, number],
-    minDistance: 100,
+    minDistance: 40, // 导览的近景需要靠近景点
     maxDistance: 1600,
-    minPitchDeg: 9,
+    minPitchDeg: 4, // 导览的近景几乎平视，才能把远山收进画面
     maxPitchDeg: 75,
     autoRotateSpeed: 0.25,
     idleResumeSec: 10,

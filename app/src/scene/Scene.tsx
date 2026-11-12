@@ -18,6 +18,8 @@ import { Water } from './Water'
 import { Boats } from './Boats'
 import { SkyLanterns } from './SkyLanterns'
 import { intro } from '../state/intro'
+import { TourDirector } from './TourDirector'
+import { Weather } from './Weather'
 import { BenchHook, Perf, ShotHook } from './Perf'
 import { useSelection } from '../state/selection'
 
@@ -54,7 +56,7 @@ function Entrance({select}:{select: ReturnType<typeof useSelection.getState>['se
     return ()=>{timeline.kill();intro.ink=0;opacity.value=1;terrain.current?.scale.setScalar(1);buildings.current?.scale.setScalar(1);landmarks.current?.scale.setScalar(1)}
   },[opacity])
   return <><CameraRig /><Base entrance={opacity} /><group onClick={e=>{if(e.delta<style.landmarks.clickMaxDrag)select(null)}}>
-    <group ref={terrain}><Terrain /></group><Water /><Roads /><ShoreLights /><Boats /><SkyLanterns />
+    <group ref={terrain}><Terrain /></group><Water /><Roads /><ShoreLights /><Boats /><SkyLanterns /><Weather /><TourDirector />
     <group ref={buildings}><Buildings /><Trees />{!lowQuality && <Mist />}</group><group ref={landmarks}><Landmarks /></group>
   </group></>
 }
