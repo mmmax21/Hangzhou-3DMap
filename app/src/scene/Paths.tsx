@@ -48,7 +48,8 @@ void main() {
   float shade = groundShade(vPos.xz);
   col *= (1.0 - shade * 0.6) * shadeTint(shade);
   // 夜晚：沿路一串很淡的灯光
-  float lamp = exp(-pow((fract(vAlong / ${P.lampSpacing.toFixed(1)}) - 0.5) * 4.0, 2.0));
+  float lampD = (fract(vAlong / ${P.lampSpacing.toFixed(1)}) - 0.5) * 4.0; // 不用 pow：底数为负时结果未定义
+  float lamp = exp(-lampD * lampD);
   col += DNC(cLight) * lamp * ${P.lampGlow.toFixed(2)} * lightsOn(vPos.xz, hash12(vec2(floor(vAlong / ${P.lampSpacing.toFixed(1)}), 3.0)));
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>

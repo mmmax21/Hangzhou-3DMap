@@ -227,9 +227,17 @@ export const style = {
   skyLanterns: { count: 80, radius: 250, rise: 330, speed: 0.022, sway: 5, drift: 30, size: 5.5, glow: 2.4 },
 
   boats: {
-    count: 6, length: 7.5, speed: 2.2, // speed：场景单位每秒
+    count: 6, length: 4.6, speed: 2.2, // speed：场景单位每秒。length 阶段 11 从 7.5 缩到 4.6，与亭子协调
     spread: 150, minRadius: 16, maxRadius: 36, shoreClear: 0.2, glow: 2.6,
     hull: { day: '#6B4A33', night: '#241C17' }, cabin: { day: '#B0553F', night: '#5A3324' }, roof: { day: '#4A4E52', night: '#14171B' },
+    // 阶段 11：画舫造型
+    deck: { day: '#9A7550', night: '#2E241B' }, // 甲板与船舷描边
+    lantern: { day: '#C8452F', night: '#C8452F' },
+    lanternGlow: 3.2,
+    cabinGlow: 2.2, // 夜晚船舱窗格亮度（只亮窗格，不再整块发光）
+    sheer: 0.22, // 船头船尾翘起的高度（相对船长）
+    beam: 0.24, // 船宽（相对船长）
+    wake: { length: 3.2, width: 1.6, opacity: 0.16 }, // 尾迹长宽（相对船长）与不透明度
   },
 
   city: {
