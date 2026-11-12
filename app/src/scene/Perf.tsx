@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
+import { usePerfTier } from '../state/perf'
 
 /** 帧率与渲染统计，写到 window.__perf，URL 带 ?stats 时显示在左上角 */
 export function Perf() {
@@ -20,7 +21,7 @@ export function Perf() {
       const perf = { fps: Math.round(fps * 10) / 10, calls: info.calls, triangles: info.triangles }
       ;(window as unknown as Record<string, unknown>).__perf = perf
       const el = document.getElementById('perf')
-      if (el) el.textContent = `${perf.fps} fps · ${perf.calls} calls · ${(perf.triangles / 1e6).toFixed(2)}M tris`
+      if (el) el.textContent = `${perf.fps} fps · ${perf.calls} calls · ${(perf.triangles / 1e6).toFixed(2)}M tris · 画质档 ${usePerfTier.getState().tier} · 像素比 ${gl.getPixelRatio()}`
       a.frames = 0
       a.t0 = now
     }

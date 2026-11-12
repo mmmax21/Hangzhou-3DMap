@@ -9,7 +9,7 @@ import { useNight } from './state/night'
 import { useSelection } from './state/selection'
 import { landmarks } from './data/loaders'
 import { useState, type CSSProperties } from 'react'
-import { lowQuality } from './config/quality'
+import { usePerfTier } from './state/perf'
 
 const params = new URLSearchParams(location.search)
 // 调试：?night 直接进入夜晚；window.__night(true|false) 切换
@@ -21,12 +21,13 @@ export function App() {
   const { selected, select } = useSelection()
   const [open, setOpen] = useState(true)
   const touring = useTour((s) => s.active)
+  const tier = usePerfTier((s) => s.tier)
   const ui = style.ui
   return (
     <div className={`app ${isNight ? 'is-night' : 'is-day'}`} style={{ '--panel-bg': isNight ? ui.background.night : ui.background.day, '--panel-fg': isNight ? ui.text.night : ui.text.day, '--panel-line': isNight ? ui.border.night : ui.border.day, '--panel-inset':`${ui.inset}px`, '--panel-width':`${ui.width}px`, '--panel-padding':`${ui.padding}px`, '--panel-font':`${ui.fontSize}px`, '--panel-heading':`${ui.headingSize}px` } as CSSProperties}>
       <Canvas
         flat
-        dpr={lowQuality ? style.render.lowDpr : [1, style.render.maxDpr]}
+        dpr={Math.min(window.devicePixelRatio, style.adaptive.dpr[tier])} // 像素比随画质档位下调
         gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }}
         camera={{ fov: style.camera.fov, near: 5, far: 12000, position: style.camera.position }}
         onCreated={({ gl }) => {

@@ -7,6 +7,7 @@ import { lowQuality } from '../config/quality'
 import { lerp, uNight } from '../state/night'
 import { PaperEffect } from './PaperEffect'
 import { intro } from '../state/intro'
+import { usePerfTier } from '../state/perf'
 
 const P = style.post
 
@@ -15,6 +16,7 @@ export function PostFX() {
   const bloom = useRef<BloomEffect>(null!)
   const vignette = useRef<VignetteEffect>(null!)
   const paper = useMemo(() => new PaperEffect(), [])
+  const tier = usePerfTier((s) => s.tier)
   useFrame(() => {
     const t = uNight.value
     if (bloom.current) {
@@ -24,7 +26,7 @@ export function PostFX() {
     if (vignette.current) vignette.current.darkness = lerp(P.vignette)
     paper.set(P.paper.strength * (1 - t) + intro.ink * 0.08, P.paper.fiber * (1 - t) + intro.ink * 0.05, intro.ink)
   })
-  if (lowQuality) return <EffectComposer multisampling={style.render.lowMsaa} enableNormalPass={false}><Bloom ref={bloom as never} mipmapBlur intensity={P.bloomIntensity.day} luminanceThreshold={P.bloomThreshold.day} luminanceSmoothing={P.bloomSmoothing} /></EffectComposer>
+  if (lowQuality || tier >= 2) return <EffectComposer multisampling={style.render.lowMsaa} enableNormalPass={false}><Bloom ref={bloom as never} mipmapBlur intensity={P.bloomIntensity.day} luminanceThreshold={P.bloomThreshold.day} luminanceSmoothing={P.bloomSmoothing} /></EffectComposer>
   return (
     <EffectComposer multisampling={style.render.msaa} enableNormalPass={false}>
       <Bloom

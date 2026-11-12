@@ -3,7 +3,7 @@ import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Reflector } from 'three/examples/jsm/objects/Reflector.js'
 import { style } from '../config/style'
-import { lowQuality } from '../config/quality'
+import { usePerfTier } from '../state/perf'
 import { TERRAIN_D, TERRAIN_W } from '../geo/geo'
 import { useSceneData } from '../data/loaders'
 import { colorPair, numPair, shared } from '../state/night'
@@ -152,7 +152,7 @@ function ReflectiveWater() {
   const h = Math.max(256, Math.round(size.height * dpr * W.reflectResolution))
   const water = useMemo(() => {
     const r = new Reflector(new THREE.PlaneGeometry(TERRAIN_W, TERRAIN_D, 1, 1), {
-      textureWidth: w, textureHeight: h, clipBias: 0.003, multisample: 2,
+      textureWidth: w, textureHeight: h, clipBias: 0.003, multisample: 0, // 倒影本来就被波纹打散，不需要抗锯齿
       // Reflector 会克隆这里的 uniforms，所以先只给它需要的三项，其余在构造后挂上，保持与全局共享
       shader: { name: 'WestLakeWater', uniforms: { color: { value: null }, tDiffuse: { value: null }, textureMatrix: { value: null } }, vertexShader: vert, fragmentShader: frag },
     })
@@ -169,5 +169,6 @@ function ReflectiveWater() {
 }
 
 export function Water() {
-  return lowQuality ? <SimpleWater /> : <ReflectiveWater />
+  const tier = usePerfTier((s) => s.tier)
+  return tier >= 1 ? <SimpleWater /> : <ReflectiveWater />
 }

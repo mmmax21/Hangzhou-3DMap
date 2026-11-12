@@ -112,7 +112,7 @@ export const style = {
     reflectBase: 0.2, // 垂直俯视时的倒影比例，越大水越像镜子
     distort: 0.55, // 波纹对倒影的扰动
     stretch: 0.012, // 倒影沿竖直方向拉长的幅度
-    reflectResolution: 0.5, // 倒影贴图相对画面的分辨率
+    reflectResolution: 0.45, // 倒影贴图相对画面的分辨率
     glint: 0.9, glintPower: 220, // 白天波光的强度和集中程度
     shoreTint: 0.6, // 近岸倒影强度
     farTint: 0.75, // 掠射角处水面泛天光的强度
@@ -181,6 +181,14 @@ export const style = {
     far: { day: '#B9C6C2', night: '#16222E' },
     near: { day: '#8FA9A8', night: '#0F1A24' },
     ridgeBase: 0.015, ridgeStep: 0.03, ridgeHeight: 0.11, hazeDepth: 0.07,
+  },
+
+  // 运行时自适应画质，见 state/perf.ts
+  adaptive: {
+    minFps: 45, // 平均帧率低于这个值就降一档
+    windowMs: 250, windows: 12, threshold: 0.8, // 每 250 毫秒取一次样，12 次里有八成不达标才降档
+    settle: 3, // 开场结束后再等几秒才开始监测
+    dpr: [1.5, 1.25, 1] as readonly number[], // 各档的像素比上限
   },
 
   tour: {

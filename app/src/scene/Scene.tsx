@@ -2,7 +2,6 @@ import { Suspense, useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import gsap from 'gsap'
 import { style } from '../config/style'
-import { lowQuality } from '../config/quality'
 import { Atmosphere } from './Atmosphere'
 import { Backdrop } from './Backdrop'
 import { Base } from './Base'
@@ -19,6 +18,8 @@ import { Boats } from './Boats'
 import { SkyLanterns } from './SkyLanterns'
 import { intro } from '../state/intro'
 import { TourDirector } from './TourDirector'
+import { AdaptiveQuality } from './AdaptiveQuality'
+import { usePerfTier } from '../state/perf'
 import { Weather } from './Weather'
 import { BenchHook, Perf, ShotHook } from './Perf'
 import { useSelection } from '../state/selection'
@@ -29,6 +30,7 @@ export function Scene() {
     <>
       <Atmosphere />
       <Backdrop />
+      <AdaptiveQuality />
       <Suspense fallback={null}>
         <Entrance select={select} />
       </Suspense>
@@ -43,6 +45,7 @@ export function Scene() {
 function Entrance({select}:{select: ReturnType<typeof useSelection.getState>['select']}) {
   const terrain=useRef<THREE.Group>(null!), buildings=useRef<THREE.Group>(null!), landmarks=useRef<THREE.Group>(null!)
   const opacity=useMemo(()=>({value:1}),[])
+  const tier=usePerfTier(s=>s.tier)
   useLayoutEffect(()=>{
     if(matchMedia('(prefers-reduced-motion: reduce)').matches)return
     const e=style.entrance
@@ -57,6 +60,6 @@ function Entrance({select}:{select: ReturnType<typeof useSelection.getState>['se
   },[opacity])
   return <><CameraRig /><Base entrance={opacity} /><group onClick={e=>{if(e.delta<style.landmarks.clickMaxDrag)select(null)}}>
     <group ref={terrain}><Terrain /></group><Water /><Roads /><ShoreLights /><Boats /><SkyLanterns /><Weather /><TourDirector />
-    <group ref={buildings}><Buildings /><Trees />{!lowQuality && <Mist />}</group><group ref={landmarks}><Landmarks /></group>
+    <group ref={buildings}><Buildings /><Trees />{tier<2 && <Mist />}</group><group ref={landmarks}><Landmarks /></group>
   </group></>
 }
