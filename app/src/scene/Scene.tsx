@@ -24,6 +24,8 @@ import { useReady } from '../state/ready'
 import { Weather } from './Weather'
 import { Shadows } from './Shadows'
 import { Lotus } from './Lotus'
+import { CausewayBridges } from './Causeways'
+import { Paths } from './Paths'
 import { BenchHook, Perf, ShotHook } from './Perf'
 import { useSelection } from '../state/selection'
 
@@ -63,7 +65,7 @@ function Entrance({select}:{select: ReturnType<typeof useSelection.getState>['se
     return ()=>{timeline.kill();intro.ink=0;opacity.value=1;terrain.current?.scale.setScalar(1);buildings.current?.scale.setScalar(1);landmarks.current?.scale.setScalar(1)}
   },[opacity])
   return <><CameraRig /><Shadows /><Base entrance={opacity} /><group onClick={e=>{if(e.delta<style.landmarks.clickMaxDrag)select(null)}}>
-    <group ref={terrain}><Terrain /></group><Water /><Lotus /><Roads /><ShoreLights /><Boats /><SkyLanterns /><Weather /><TourDirector />
-    <group ref={buildings}><Buildings /><Trees />{tier<2 && <Mist />}</group><group ref={landmarks}><Landmarks /></group>
+    <group ref={terrain}><Terrain /></group><Water /><Lotus /><Roads /><Paths /><ShoreLights /><Boats /><SkyLanterns /><Weather /><TourDirector />
+    <group ref={buildings}><Buildings /><Trees />{tier<2 && <Mist />}</group><group ref={landmarks}><Landmarks /><Suspense fallback={null}><CausewayBridges /></Suspense></group>
   </group></>
 }

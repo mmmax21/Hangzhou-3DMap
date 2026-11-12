@@ -19,7 +19,7 @@ export type TourStop = {
 
 export const tourStops: TourStop[] = [
   { id: null, title: '西湖', poem: ['湖上春来似画图', '乱峰围绕水平铺'], source: '唐 · 白居易《春题湖上》', night: 0 },
-  { id: 'sudi', title: '苏堤春晓', poem: ['水光潋滟晴方好', '山色空蒙雨亦奇'], source: '宋 · 苏轼《饮湖上初晴后雨》', night: 0, petals: 1, from: [104, 21, 46], to: [84, 18, 36], lift: 9 },
+  { id: 'sudi', title: '苏堤春晓', poem: ['水光潋滟晴方好', '山色空蒙雨亦奇'], source: '宋 · 苏轼《饮湖上初晴后雨》', night: 0, petals: 1, from: [60, 18, 62], to: [48, 15, 50], lift: 9 },
   { id: 'quyuan', title: '曲院风荷', poem: ['接天莲叶无穷碧', '映日荷花别样红'], source: '宋 · 杨万里《晓出净慈寺送林子方》', night: 0, from: [84, 19, 58], to: [66, 16, 46], lift: 9 },
   { id: 'leifeng', title: '雷峰夕照', poem: ['湖上画船归欲尽', '孤峰犹带夕阳红'], source: '元 · 尹廷高《雷峰夕照》', night: 0.42, from: [112, 30, -40], to: [92, 26, -30], lift: 19 },
   { id: 'santan', title: '三潭印月', poem: ['松排山面千重翠', '月点波心一颗珠'], source: '唐 · 白居易《春题湖上》', night: 1, from: [92, 20, 56], to: [74, 17, 44], lift: 9 },

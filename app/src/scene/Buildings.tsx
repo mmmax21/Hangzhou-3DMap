@@ -7,6 +7,7 @@ import { colorPair, shared } from '../state/night'
 import { glslCommon } from '../shaders/common'
 import { glslShadow, shadowUniforms } from '../state/shadows'
 import { octSDF, terrainY } from './terrainHeight'
+import { walkwayClearance } from '../data/walkways'
 
 const B = style.buildings
 const C = style.colors
@@ -118,6 +119,7 @@ export function Buildings() {
       if (clear.some(([lx, lz]) => (lx - cx) ** 2 + (lz - cz) ** 2 < r2)) continue
       const [u, v] = sceneToUV(cx, cz)
       if (sampleMask(d, u, v) > 0.5) continue
+      if (walkwayClearance(d, cx, cz) < style.paths.clear + 1) continue // 阶段 10：给步道让路
       // 离湖远的城区留白，像画卷边缘渐渐散开
       const hs = Math.sin(u * 913.7 + v * 271.3) * 43758.5453
       if (sampleMask(d, u, v, 2) > style.city.reach + (hs - Math.floor(hs) - 0.5) * style.city.feather) continue

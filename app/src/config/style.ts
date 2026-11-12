@@ -326,6 +326,38 @@ export const style = {
     lowFraction: 0.35, // 第 2 档只保留这么多
   },
 
+  // 阶段 10：苏堤、白堤与步道，见 data/causeways.ts、scene/Causeways.tsx、scene/Paths.tsx
+  causeways: {
+    halfWidth: 4.2, // 堤面半宽（场景单位）。真实苏堤约 40 米宽，这里放大到约 84 米，才能放下步道和两排柳树
+    shoulder: 1.6, // 堤岸从堤面斜到湖底的宽度
+    topMeters: 1.3, // 堤面高出水面的海拔米数（夸张后约 0.6 个单位）
+    extend: 7, // 堤两端向岸上延伸，保证与岸相接
+    bridgeLength: 17, // 苏堤、锦带桥的桥长（场景单位）；断桥沿用景点模型的尺寸
+    bridgeWidth: 1.1, // 桥宽相对模型原比例的倍数
+    bridgeGlow: 0.5, // 夜晚桥身微亮，相对景点 nightGlow 的比例
+    opening: 0.36, // 桥下开水道的半长，相对桥长
+    willowInset: 1.0, // 堤边柳树离堤沿的距离
+    pathClear: 1.0, // 柳树离步道边缘的最小距离
+    pick: 3, // 苏堤、白堤点击拾取体的高度
+  },
+  paths: {
+    width: 2.2, // 堤上步道宽
+    ringWidth: 1.6, // 环湖步道宽
+    spurWidth: 1.1, // 通往景点的小路宽
+    lift: 0.22, // 离地高度
+    step: 1.6, // 网格取样间距
+    ringInland: 8, // 环湖步道离水边的距离（水域遮罩像素）
+    ringSmooth: 3, // 平滑次数
+    spurMax: 75, // 景点离环湖步道超过这个距离就不接小路
+    slab: 1.4, // 石板长度
+    stone: { day: '#D2C6A8', night: '#2C2A26' },
+    stoneDark: { day: '#B4A684', night: '#22211E' },
+    lampSpacing: 9, // 夜晚灯光的间距
+    lampGlow: 0.3, // 夜晚灯光亮度（很淡，不抢戏）
+    clear: 1.2, // 树和建筑离步道边缘的最小距离
+    lowStep: 2.6, // 第 2 档的取样间距
+  },
+
   render: {
     maxDpr: 1.5, // PRD 允许最高 2；骨架阶段取 1.5 保帧率，画质分档阶段再按设备调
     msaa: 4,

@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { decode } from 'fast-png'
 import landmarksJson from './landmarks.json'
 import { style } from '../config/style'
+import { applyCauseways } from './causeways'
 
 export type Landmark = {
   id: string
@@ -102,6 +103,9 @@ async function load(): Promise<SceneData> {
     for (let c = 0; c < 3; c++) mask[i * 4 + c] = wd[i * wm.channels + c]
     mask[i * 4 + 3] = 255
   }
+  // 阶段 10：按苏堤、白堤的走向改写高度图和水域遮罩（加宽堤面、桥下开水道、接通白堤）
+  if (m === n) applyCauseways(meta, elevation, n, mask, m)
+  else console.warn('[causeways] 高度图与水域遮罩尺寸不同，跳过堤的改写')
   const maskTex = new THREE.DataTexture(mask, m, m, THREE.RGBAFormat, THREE.UnsignedByteType)
   maskTex.magFilter = maskTex.minFilter = THREE.LinearFilter
   maskTex.needsUpdate = true
