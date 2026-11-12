@@ -261,6 +261,28 @@ export const style = {
     cameraFrom: [60, 820, 230] as [number, number, number], cameraStart: .9, cameraDuration: 5.2,
   },
 
+  // 阶段 8：日光投影，见 scene/Shadows.tsx。主光方向沿用 lighting.sunDir（shared.uSunDir）
+  shadows: {
+    // 物体（景点、树、建筑）投到地面和建筑上的影子强度：0 无影，1 完全挡住主光
+    strength: { day: 0.62, night: 0.04 } as DN<number>,
+    // 山体投影与背光面（按主光方向在高度图上步进求遮蔽）的强度
+    terrainStrength: { day: 0.48, night: 0.04 } as DN<number>,
+    tint: '#6F8FA0', // 影子里偏一点石青，避免发灰发黑
+    tintAmount: 0.22,
+    mapSize: 2048, // 阴影贴图边长，覆盖整个沙盘约 0.45 单位一个像素
+    radius: 3, // three 自带 PCF 的模糊半径（景点、树受影）
+    bias: -0.0006, normalBias: 0.35,
+    maskSize: 1536, // 地面阴影遮罩边长：只在主光方向变化时重算，地形每像素只取样一次
+    maskSoft: 1.6, // 地面遮罩 PCF 的取样间距（阴影贴图像素），越大越柔
+    maskBias: 1.2, // 地面遮罩比较深度的偏移（场景单位），地面不投影，只用来避免网格与高度图的微小差异
+    occSteps: 40, occDistance: 260, // 山体遮蔽的步进次数和最远距离（场景单位）
+    occSoft: 3.5, // 山体遮蔽的柔和度，越小半影越宽
+    casterTop: 200, // 投影者的最高高度（场景单位），用于拟合阴影相机
+    minAngle: 0.003, // 主光方向变化超过这个弧度才重算
+    interval: 0.2, // 主光方向持续变化时（昼夜过渡）两次重算的最短间隔（秒）
+    contactKeep: 0.45, // 有真实投影时接触阴影保留的比例；第 2 档没有投影，接触阴影保持原样
+  },
+
   render: {
     maxDpr: 1.5, // PRD 允许最高 2；骨架阶段取 1.5 保帧率，画质分档阶段再按设备调
     msaa: 4,

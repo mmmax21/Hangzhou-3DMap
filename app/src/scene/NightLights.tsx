@@ -7,6 +7,7 @@ import { sampleMask, useSceneData } from '../data/loaders'
 import { sceneToUV } from '../geo/geo'
 import { colorPair, shared } from '../state/night'
 import { glslCommon } from '../shaders/common'
+import { glslShadow, shadowUniforms } from '../state/shadows'
 import { octSDF, terrainY } from './terrainHeight'
 
 const R = style.roads
@@ -19,11 +20,14 @@ void main() { vPos = position; gl_Position = projectionMatrix * modelViewMatrix 
 `
 const roadFrag = /* glsl */ `
 ${glslCommon}
+${glslShadow}
 uniform vec3 cRoad[2]; uniform vec3 cLight[2];
 varying vec3 vPos;
 void main() {
   if (octSDF(vPos.xz) > -6.0) discard;
   vec3 col = mix(DNC(cRoad), DNC(cLight) * ${R.nightGlow.toFixed(2)}, uNight * ${R.nightMix.toFixed(2)});
+  float shade = groundShade(vPos.xz); // 阶段 8：路面跟随地面一起进影
+  col *= (1.0 - shade * 0.55) * shadeTint(shade);
   float a = mix(${R.dayOpacity.toFixed(2)}, ${R.nightOpacity.toFixed(2)}, uNight);
   gl_FragColor = vec4(col, a);
   #include <colorspace_fragment>
@@ -82,7 +86,7 @@ export function Roads() {
         polygonOffset: true,
         polygonOffsetFactor: -2,
         polygonOffsetUnits: -2,
-        uniforms: { ...shared, cRoad: colorPair(C.road), cLight: colorPair(C.light) },
+        uniforms: { ...shared, ...shadowUniforms, cRoad: colorPair(C.road), cLight: colorPair(C.light) },
       }),
     [],
   )
