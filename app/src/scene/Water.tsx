@@ -23,7 +23,7 @@ uniform sampler2D uMask;
 uniform vec2 uSize;
 uniform vec3 uMoonDir;
 uniform vec3 cWater[2]; uniform vec3 cDeep[2]; uniform vec3 cShore[2];
-uniform vec3 cMoonRefl[2]; uniform vec3 cLight[2];
+uniform vec3 cMoonRefl[2]; uniform vec3 cLight[2]; uniform vec3 cFar[2];
 uniform float pRipple[2];
 varying vec3 vPos;
 
@@ -44,6 +44,9 @@ void main() {
   vec3 col = mix(DNC(cWater), DNC(cDeep), smoothstep(0.05, 0.7, depth));
   col = mix(col, DNC(cShore), (1.0 - smoothstep(0.0, 0.12, depth)) * ${W.shoreTint.toFixed(2)});
   col *= 1.0 + (fbm(vPos.xz * 0.02) - 0.5) * 0.04;
+  // 掠射角处泛天光，近处保留水色，拉开远近层次
+  float fres = pow(1.0 - max(dot(-V, n), 0.0), 4.0);
+  col = mix(col, DNC(cFar), fres * ${W.farTint.toFixed(2)});
 
   // 月光倒影：从相机朝月亮方位延伸的一条窄带，按角宽度计算（近窄远宽符合透视），再切成横向碎光
   vec3 md = normalize(uMoonDir);
@@ -63,7 +66,7 @@ void main() {
   vec2 sq = vec2(dot(vPos.xz, vp) * 0.9, dot(vPos.xz, vd) * 0.9 / ${W.shoreLights.streak.toFixed(1)});
   float streak = smoothstep(0.7, 0.95, vnoise(sq + vec2(0.0, t)));
   float near = 1.0 - smoothstep(0.0, ${W.shoreLights.reach.toFixed(2)}, depth);
-  col += DNC(cLight) * streak * near * ${W.shoreLights.strength.toFixed(2)} * uNight;
+  col += DNC(cLight) * streak * near * ${W.shoreLights.strength.toFixed(2)} * lightsOn(vPos.xz, 0.5);
 
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
@@ -86,6 +89,7 @@ export function Water() {
           cShore: colorPair(C.waterShore),
           cMoonRefl: colorPair(C.moonReflection),
           cLight: colorPair(C.light),
+          cFar: colorPair(C.waterFar),
           pRipple: numPair(W.rippleStrength),
         },
       }),

@@ -83,15 +83,21 @@ export function Trees() {
       const thin=(items:THREE.Matrix4[])=>{const kept=items.filter((_,i)=>Math.floor((i+1)*style.render.lowTreeFraction)>Math.floor(i*style.render.lowTreeFraction));items.splice(0,items.length,...kept)}
       thin(forest);thin(willows)
     }
-    const make=(geometry:THREE.BufferGeometry,matrices:THREE.Matrix4[])=>{
-      const mesh=new THREE.InstancedMesh(geometry,new THREE.MeshStandardMaterial({roughness:1}),matrices.length)
+    const make=(geometry:THREE.BufferGeometry,matrices:THREE.Matrix4[],shade?:[number,number])=>{
+      const material=new THREE.MeshStandardMaterial({roughness:1})
+      // 树冠下暗上亮，给一点体积感
+      if(shade)material.onBeforeCompile=s=>{
+        s.vertexShader='varying float vCrownY;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n vCrownY = position.y;')
+        s.fragmentShader='varying float vCrownY;\n'+s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\n diffuseColor.rgb *= mix(${T.shadeLow.toFixed(2)}, ${T.shadeHigh.toFixed(2)}, smoothstep(${shade[0].toFixed(2)}, ${shade[1].toFixed(2)}, vCrownY));`)
+      }
+      const mesh=new THREE.InstancedMesh(geometry,material,matrices.length)
       const tint=new THREE.Color()
       matrices.forEach((m,i)=>{mesh.setMatrixAt(i,m);const f=Math.sin(i*12.9898)*43758.5453,k=1+(f-Math.floor(f)-.5)*2*T.tint;mesh.setColorAt(i,tint.setRGB(k,k,k))})
       mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;mesh.computeBoundingSphere();return mesh
     }
     const trunks=new THREE.CylinderGeometry(T.crownRadius*.1,T.crownRadius*.14,T.trunkHeight,5).translate(0,T.trunkHeight/2,0)
     console.info(`[trees] forest=${forest.length}, willows=${willows.length}; 3 instanced draws`)
-    return [make(crown(false),forest),make(crown(true),willows),make(trunks,[...forest,...willows])]
+    return [make(crown(false),forest,[T.trunkHeight,T.trunkHeight+T.crownHeight*1.2]),make(crown(true),willows,[T.trunkHeight*.6,T.trunkHeight+T.willowHeight*.6]),make(trunks,[...forest,...willows])]
   },[d])
   useEffect(()=>()=>meshes.forEach(m=>{m.geometry.dispose();(m.material as THREE.Material).dispose()}),[meshes])
   useFrame(()=>meshes.forEach((m,i)=>{

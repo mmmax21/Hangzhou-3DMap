@@ -11,9 +11,11 @@ export const style = {
     base: { day: '#D5B088', night: '#30343B' },
     baseTop: { day: '#E3CDA8', night: '#171A1F' }, // 新增：底座顶面留边
     baseEdge: { day: '#B8955A', night: '#8A6A30' }, // 白天为新增的淡金细线
-    water: { day: '#ECD8BA', night: '#1C3648' },
-    waterDeep: { day: '#F0DFC4', night: '#13283A' },
-    waterShore: { day: '#BDB98E', night: '#203C48' }, // 新增：近岸倒影色
+    // 白天水色改为淡青瓷色：原来的米色和平地几乎同色，湖读不出来
+    water: { day: '#D9E4D3', night: '#1C3648' },
+    waterDeep: { day: '#CADDD2', night: '#13283A' },
+    waterShore: { day: '#93B48A', night: '#203C48' }, // 近岸倒影色
+    waterFar: { day: '#F3EFE2', night: '#2A4658' }, // 远处水面泛天光
     mountainHigh: { day: '#2F6F8F', night: '#0A1E26' },
     mountainHigh2: { day: '#4C787E', night: '#0D2229' },
     mountainMid: { day: '#7AA67D', night: '#1F2923' },
@@ -45,22 +47,23 @@ export const style = {
     crownRadius: 1.7, crownHeight: 1.8, trunkHeight: 1.3,
     willowHeight: 3.2, willowRadius: 1.3, variation: 0.3,
     minMountainY: 7, edgeMargin: 12,
-    footMaxY: 30, // 山上的树只长到这个高度，再往上露出青绿山体和金线
+    footMaxY: 40, // 山上的树只长到这个高度，再往上露出青绿山体和金线
     footFade: 1.6, // 越大，树越集中在山脚
     tint: 0.16, // 每棵树的明暗随机幅度
+    shadeLow: 0.6, shadeHigh: 1.14, // 树冠底部和顶部的明暗
     landmarkClearance: 15, nightGlow: 0.08,
     crownSegments: 6, crownRings: 4,
   },
 
   mist: {
-    grid: 46, minY: 14, maxY: 80, lift: 7, width: 105, height: 24,
+    grid: 46, minY: 18, maxY: 105, lift: 7, width: 105, height: 24,
     opacity: { day: 0.6, night: 0.4 }, drift: 0.8, noiseScale: 4,
     edgeMargin: 60, landmarkClearance: 30,
   },
 
   terrain: {
-    exaggeration: 3.5, // PRD 第 3 节：只作用于地形
-    peakCurve: 0.2, // 高处额外加陡：海拔差达到 peakRef 时再乘 1.2
+    exaggeration: 4.6, // 为主镜头的山势再加高，不再追求真实比例
+    peakCurve: 0.3, // 高处额外加陡：海拔差达到 peakRef 时再乘 1.2
     peakRef: 240,
     segments: 480, // 为景点精模留出三角面预算
     lowSegments: 224, smoothingWeights: [4, 2, 1] as const,
@@ -90,8 +93,8 @@ export const style = {
     // 主光方向（从地面指向光源），白天来自西南偏上，夜晚为月光方向
     sunDir: { day: [-0.45, 0.8, 0.35], night: [0.55, 0.55, -0.6] } as DN<[number, number, number]>,
     sunColor: { day: '#FFF4E2', night: '#9FB4D8' },
-    sunIntensity: { day: 0.75, night: 0.8 },
-    ambient: { day: 0.5, night: 0.85 }, // 自定义着色器里的环境光比例（阴影很淡）
+    sunIntensity: { day: 0.92, night: 0.8 },
+    ambient: { day: 0.43, night: 0.85 }, // 自定义着色器里的环境光比例（阴影很淡）
     // 给 GLB 模型用的 three.js 灯光强度
     hemiSky: { day: '#FFF6E8', night: '#33415A' },
     hemiGround: { day: '#B9A27E', night: '#0C1014' },
@@ -102,7 +105,8 @@ export const style = {
   water: {
     rippleScale: 0.08,
     rippleStrength: { day: 0.015, night: 0.025 },
-    shoreTint: 0.55, // 近岸倒影强度
+    shoreTint: 0.6, // 近岸倒影强度
+    farTint: 0.75, // 掠射角处水面泛天光的强度
     moonBand: { width: 0.016, breakFreq: 0.45, strength: 2.6 }, // width：倒影带的角半宽（弧度）；breakFreq：碎光沿带方向的频率
     shoreLights: { strength: 1.1, reach: 0.07, streak: 18.0 }, // 岸灯倒影：reach 为离岸距离（watermask G 通道单位）
   },
@@ -141,6 +145,7 @@ export const style = {
     nightGlow: 1.15, // 夜晚自发光强度，发光跟随贴图，保留屋檐和柱子的明暗
     modelSize: 22, hoverLift: 3, hoverDamping:10, flightDuration: 1.5,
     modelSaturation: .82, modelGain: 1.22, modelRoughness: .9,
+    shadowScale: .62, shadowOpacity: .38, shadowOffset: [.25, -.12] as [number, number], // 接触阴影：半径相对模型高度，偏向背光一侧
     // 模型高度（场景单位）。为了在全景里看得见，比真实比例夸张得多：塔约 4 到 5 倍，亭和殿更大
     sizes: { leifeng:34, baochu:27, duanqiao:9, huxinting:14, santan:13, quyuan:13, huagang:9.5, yuewang:15, sudi:6 } as Record<string,number>,
     rotations: { duanqiao:-.65, sudi:1.4 } as Record<string,number>,
@@ -159,6 +164,28 @@ export const style = {
     innerFloorY: -2, // 地形下方的封底高度，必须低于湖底
   },
 
+  backdrop: {
+    radius: 4000,
+    top: { day: '#D9C3A6', night: '#0B1220' },
+    horizon: { day: '#F1E6D2', night: '#1B2836' },
+    far: { day: '#B9C6C2', night: '#16222E' },
+    near: { day: '#8FA9A8', night: '#0F1A24' },
+    ridgeBase: 0.015, ridgeStep: 0.03, ridgeHeight: 0.11, hazeDepth: 0.07,
+  },
+
+  skyLanterns: { count: 80, radius: 250, rise: 330, speed: 0.022, sway: 5, drift: 30, size: 5.5, glow: 2.4 },
+
+  boats: {
+    count: 6, length: 7.5, speed: 2.2, // speed：场景单位每秒
+    spread: 150, minRadius: 16, maxRadius: 36, shoreClear: 0.2, glow: 2.6,
+    hull: { day: '#6B4A33', night: '#241C17' }, cabin: { day: '#B0553F', night: '#5A3324' }, roof: { day: '#4A4E52', night: '#14171B' },
+  },
+
+  city: {
+    reach: 0.75, // 只保留离湖这么近的建筑（watermask B 通道单位，1 约 450 米），更远处留白
+    feather: 0.45, // 留白的过渡宽度，越大边缘越散
+  },
+
   moon: {
     screen: [0.32, 0.8] as [number, number], // 月亮在画面中的位置（NDC，-1..1），随相机固定在右上方
     distance: 2600,
@@ -168,11 +195,12 @@ export const style = {
 
   camera: {
     fov: 32,
-    position: [0, 700, 910] as [number, number, number],
-    target: [0, 0, 20] as [number, number, number],
+    // 主镜头：从湖东岸向西看，雷峰塔在左前，群山作背景，城区落在镜头之外
+    position: [455, 150, 175] as [number, number, number],
+    target: [-75, 22, -15] as [number, number, number],
     minDistance: 100,
     maxDistance: 1600,
-    minPitchDeg: 20,
+    minPitchDeg: 9,
     maxPitchDeg: 75,
     autoRotateSpeed: 0.25,
     idleResumeSec: 10,
@@ -189,9 +217,17 @@ export const style = {
     warmth: { day: 0.0, night: 0.0 },
   },
 
-  transition: { duration: 3 },
+  transition: { duration: 5.5 }, // 入夜时灯火从东向西依次点亮，需要足够长才看得出先后
 
-  entrance: { duration: 3, baseDuration: .8, terrainStart: .4, terrainDuration: 1.8, objectsStart: 1.4, objectsDuration: 1.3, landmarkStart: 1.8, landmarkDuration: 1.2, initialScale: .001 },
+  // 开场：先是高处俯视的一幅平铺水墨，随后山隆起、颜色晕开、镜头降到主镜头
+  entrance: {
+    duration: 6.2, baseDuration: .8, initialScale: .001,
+    terrainStart: 1.0, terrainDuration: 2.8,
+    objectsStart: 2.6, objectsDuration: 1.5,
+    landmarkStart: 3.2, landmarkDuration: 1.4,
+    inkStart: 1.6, inkDuration: 3.0,
+    cameraFrom: [60, 820, 230] as [number, number, number], cameraStart: .9, cameraDuration: 5.2,
+  },
 
   render: {
     maxDpr: 1.5, // PRD 允许最高 2；骨架阶段取 1.5 保帧率，画质分档阶段再按设备调

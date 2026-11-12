@@ -5,6 +5,7 @@ import * as THREE from 'three'
 const fragment = /* glsl */ `
 uniform float strength;
 uniform float fiber;
+uniform float ink;
 float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float n2(vec2 p) {
   vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);
@@ -18,6 +19,10 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float f1 = smoothstep(0.78, 1.0, n2(vec2(px.x / 90.0, px.y / 3.0)));
   float f2 = smoothstep(0.80, 1.0, n2(vec2(px.x / 3.5 + 31.0, px.y / 110.0)));
   vec3 c = inputColor.rgb;
+  // 开场的水墨阶段：把画面压成纸色到墨色的单色调
+  float lum = dot(c, vec3(0.299, 0.587, 0.114));
+  vec3 inked = mix(vec3(0.17, 0.16, 0.15), vec3(0.93, 0.89, 0.80), smoothstep(0.08, 0.92, lum));
+  c = mix(c, inked, ink);
   c *= 1.0 + strength * (grain * 0.35 + cloud * 0.8);
   c = mix(c, c * 1.08 + 0.02, (f1 + f2) * fiber);
   outputColor = vec4(c, inputColor.a);
@@ -30,10 +35,12 @@ export class PaperEffect extends Effect {
       uniforms: new Map<string, THREE.Uniform>([
         ['strength', new THREE.Uniform(0)],
         ['fiber', new THREE.Uniform(0)],
+        ['ink', new THREE.Uniform(0)],
       ]),
     })
   }
-  set(strength: number, fiber: number) {
+  set(strength: number, fiber: number, ink = 0) {
+    this.uniforms.get('ink')!.value = ink
     this.uniforms.get('strength')!.value = strength
     this.uniforms.get('fiber')!.value = fiber
   }

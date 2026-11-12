@@ -95,8 +95,10 @@ uniform float uSize;
 uniform float uScale;
 attribute float aSeed;
 varying float vSeed;
+varying vec2 vXZ;
 void main() {
   vSeed = aSeed;
+  vXZ = position.xz;
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
   gl_PointSize = uSize * uScale / -mv.z;
   gl_Position = projectionMatrix * mv;
@@ -107,13 +109,14 @@ ${glslCommon}
 uniform vec3 cLight[2];
 uniform float uGlow;
 varying float vSeed;
+varying vec2 vXZ;
 void main() {
   vec2 c = gl_PointCoord - 0.5;
   float r = length(c) * 2.0;
   float a = smoothstep(1.0, 0.0, r);
   a = a * a;
   float flick = 0.85 + 0.15 * sin(uTime * 2.0 + vSeed * 40.0);
-  gl_FragColor = vec4(DNC(cLight) * uGlow * a * flick * uNight, 1.0);
+  gl_FragColor = vec4(DNC(cLight) * uGlow * a * flick * lightsOn(vXZ, vSeed), 1.0);
 }
 `
 

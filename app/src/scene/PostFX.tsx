@@ -6,6 +6,7 @@ import { style } from '../config/style'
 import { lowQuality } from '../config/quality'
 import { lerp, uNight } from '../state/night'
 import { PaperEffect } from './PaperEffect'
+import { intro } from '../state/intro'
 
 const P = style.post
 
@@ -21,7 +22,7 @@ export function PostFX() {
       bloom.current.luminanceMaterial.threshold = lerp(P.bloomThreshold)
     }
     if (vignette.current) vignette.current.darkness = lerp(P.vignette)
-    paper.set(P.paper.strength * (1 - t), P.paper.fiber * (1 - t))
+    paper.set(P.paper.strength * (1 - t) + intro.ink * 0.08, P.paper.fiber * (1 - t) + intro.ink * 0.05, intro.ink)
   })
   if (lowQuality) return <EffectComposer multisampling={style.render.lowMsaa} enableNormalPass={false}><Bloom ref={bloom as never} mipmapBlur intensity={P.bloomIntensity.day} luminanceThreshold={P.bloomThreshold.day} luminanceSmoothing={P.bloomSmoothing} /></EffectComposer>
   return (

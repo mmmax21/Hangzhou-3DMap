@@ -68,7 +68,7 @@ void main() {
     float on = step(1.0 - ratio, hash12(id + vSeed * 37.0 + lod * 3.1));
     float valid = step(1.5, vLocalY) * step(vLocalY, vHeight - 1.0);
     float warm = 0.65 + 0.35 * hash12(id * 1.7 + vSeed);
-    col += DNC(cLight) * win * on * warm * valid * ${B.windowGlow.toFixed(2)} * uNight;
+    col += DNC(cLight) * win * on * warm * valid * ${B.windowGlow.toFixed(2)} * lightsOn(vPos.xz, fract(vSeed * 7.0));
     col += DNC(cLight) * ${B.wallGlow.toFixed(3)} * uNight;
   }
   gl_FragColor = vec4(col, 1.0);
@@ -113,6 +113,9 @@ export function Buildings() {
       if (clear.some(([lx, lz]) => (lx - cx) ** 2 + (lz - cz) ** 2 < r2)) continue
       const [u, v] = sceneToUV(cx, cz)
       if (sampleMask(d, u, v) > 0.5) continue
+      // 离湖远的城区留白，像画卷边缘渐渐散开
+      const hs = Math.sin(u * 913.7 + v * 271.3) * 43758.5453
+      if (sampleMask(d, u, v, 2) > style.city.reach + (hs - Math.floor(hs) - 0.5) * style.city.feather) continue
       // 底部取轮廓各点地表的最低值，再下沉，保证坡地不悬空
       let by = Infinity
       for (const p of pts) by = Math.min(by, terrainY(d, p.x, p.y))

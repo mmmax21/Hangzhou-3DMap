@@ -38,4 +38,10 @@ float fbm(vec2 p) {
 float fbm2(vec2 p) {
   return (vnoise(p) * 0.5 + vnoise(p * 2.03 + 17.1) * 0.25) / 0.75;
 }
+// 入夜时灯火从东向西依次点亮：x 越靠东越早亮，seed 给每盏灯一点随机先后
+float lightsOn(vec2 xz, float seed) {
+  float k = clamp(xz.x / OCT.x * 0.5 + 0.5, 0.0, 1.0);
+  float d = (1.0 - k) * 0.55 + seed * 0.1;
+  return smoothstep(d, d + 0.3, uNight);
+}
 `

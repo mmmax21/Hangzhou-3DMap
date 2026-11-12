@@ -24,11 +24,20 @@ export function CameraRig() {
   const data = useSceneData()
   const flight=useRef<gsap.core.Timeline|null>(null)
   const initial=useRef(true)
+  const introTween=useRef<gsap.core.Tween|null>(null)
 
   useEffect(() => {
     camera.position.set(...Cm.position)
     ref.current?.target.set(...Cm.target)
     ref.current?.update()
+    // 开场运镜：从高处俯视平铺的画面，降到主镜头
+    const e = style.entrance
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      introTween.current = gsap.fromTo(camera.position,
+        { x: Cm.target[0] + e.cameraFrom[0], y: e.cameraFrom[1], z: Cm.target[2] + e.cameraFrom[2] },
+        { x: Cm.position[0], y: Cm.position[1], z: Cm.position[2], duration: e.cameraDuration, delay: e.cameraStart, ease: 'power2.inOut', onUpdate: () => ref.current?.update() })
+      if (import.meta.env.DEV) (window as unknown as Record<string, unknown>).__introCam = introTween.current
+    }
     ;(window as unknown as Record<string, unknown>).__controls = ref.current
   }, [camera])
 
@@ -70,7 +79,7 @@ export function CameraRig() {
       maxPolarAngle={(90 - Cm.minPitchDeg) * deg}
       autoRotateSpeed={Cm.autoRotateSpeed}
       screenSpacePanning={false}
-      onStart={() => {flight.current?.kill();lastInput.current = Infinity}}
+      onStart={() => {introTween.current?.kill();flight.current?.kill();lastInput.current = Infinity}}
       onEnd={() => (lastInput.current = performance.now() / 1000 - 0)}
     />
   )
