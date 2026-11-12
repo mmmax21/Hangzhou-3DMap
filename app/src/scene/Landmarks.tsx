@@ -10,6 +10,8 @@ import { useSelection } from '../state/selection'
 import { OCT, terrainY } from './terrainHeight'
 import { injectTerrainShade, requestShadowUpdate } from '../state/shadows'
 import { usePerfTier } from '../state/perf'
+import { bridges } from '../data/causeways'
+import { CausewayPick } from './Causeways'
 declare const __MODEL_FILES__: string[]
 const L = style.landmarks
 /** 与 GLSL 的 lightsOn 一致：越靠东越早亮 */
@@ -69,8 +71,10 @@ function Marker({ item, position, material }: { item: Landmark; position: [numbe
   useFrame((_,dt)=>{group.current.position.y=THREE.MathUtils.damp(group.current.position.y,hover?L.hoverLift:0,L.hoverDamping,dt)})
   useEffect(()=>()=>{document.body.style.cursor=''},[])
   const [sx, sy, sz] = L.placeholderSize
-  const file=item.id==='sudi'?'duanqiao.glb':item.model
-  const placeholder = item.model ? <mesh position={[0, sy / 2, 0]} material={material}><boxGeometry args={[sx, sy, sz]} /></mesh> : <mesh position={[0, L.markerHeight/2, 0]} material={material}><cylinderGeometry args={[L.markerRadius, L.markerRadius, L.markerHeight, L.markerSegments]} /></mesh>
+  // 阶段 10：苏堤、白堤不再画占位（苏堤原来借用了断桥模型，白堤是水面上的扁圆柱），改为沿堤的不可见拾取体
+  const causeway=item.id==='sudi'||item.id==='baidi'
+  const file=item.model
+  const placeholder = causeway ? <CausewayPick id={item.id} origin={position}/> : item.model ? <mesh position={[0, sy / 2, 0]} material={material}><boxGeometry args={[sx, sy, sz]} /></mesh> : <mesh position={[0, L.markerHeight/2, 0]} material={material}><cylinderGeometry args={[L.markerRadius, L.markerRadius, L.markerHeight, L.markerSegments]} /></mesh>
   const shadowR=(L.sizes[item.id]??sy)*L.shadowScale
   // 阶段 8：有真实投影时接触阴影减弱，只留脚下一点压实感；第 2 档没有投影，保持原样
   const tier=usePerfTier(s=>s.tier)
@@ -79,7 +83,7 @@ function Marker({ item, position, material }: { item: Landmark; position: [numbe
     onPointerOver={e => { e.stopPropagation(); setHover(true); document.body.style.cursor = 'pointer' }}
     onPointerOut={() => { setHover(false); document.body.style.cursor = '' }}
     onClick={e => { e.stopPropagation(); if(e.delta<L.clickMaxDrag)select(item) }}>
-    {file && __MODEL_FILES__.includes(file) ? <ModelBoundary fallback={placeholder}><Suspense fallback={placeholder}><group rotation={[0,L.rotations[item.id]??0,0]}><Model file={file} size={L.sizes[item.id]} x={position[0]}/></group>{item.id==='santan'&&__MODEL_FILES__.includes('santan-stone.glb')&&L.stoneOffsets.map((offset,i)=><group key={i} position={offset}><Model file="santan-stone.glb" size={L.stoneSize} x={position[0]}/></group>)}</Suspense></ModelBoundary> : placeholder}
+    {file && __MODEL_FILES__.includes(file) ? <ModelBoundary fallback={placeholder}><Suspense fallback={placeholder}><group rotation={[0,bridges.find(b=>b.landmark===item.id)?.rotation??L.rotations[item.id]??0,0]}><Model file={file} size={L.sizes[item.id]} x={position[0]}/></group>{item.id==='santan'&&__MODEL_FILES__.includes('santan-stone.glb')&&L.stoneOffsets.map((offset,i)=><group key={i} position={offset}><Model file="santan-stone.glb" size={L.stoneSize} x={position[0]}/></group>)}</Suspense></ModelBoundary> : placeholder}
     {hover && <Html position={[0, (L.sizes[item.id] ?? sy) + L.labelLift, 0]} center className="landmark-label">{item.name}</Html>}
   </group></group>
 }

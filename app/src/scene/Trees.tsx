@@ -9,6 +9,8 @@ import { lngLatToScene, sceneToUV, TERRAIN_D, TERRAIN_W } from '../geo/geo'
 import { lerpColor, uNight } from '../state/night'
 import { octSDF, terrainY } from './terrainHeight'
 import { injectTerrainShade } from '../state/shadows'
+import { causeways, inBridge, nearCauseway, pointAt } from '../data/causeways'
+import { walkwayClearance } from '../data/walkways'
 const T = style.trees
 function inside(x:number,z:number,r:number[][]) {
   let hit=false
@@ -48,6 +50,10 @@ export function Trees() {
     })
     const add=(x:number,z:number,willow:boolean)=>{
       if(octSDF(x,z)>-T.edgeMargin||clear.some(([a,b])=>Math.hypot(a-x,b-z)<T.landmarkClearance))return
+      // 阶段 10：不长在步道上，也不长在桥上
+      const nc=nearCauseway(x,z)
+      if(nc.bridge&&nc.d<style.causeways.halfWidth+style.causeways.shoulder+2)return
+      if(walkwayClearance(d,x,z)<style.paths.clear)return
       const [u,v]=sceneToUV(x,z)
       if(sampleMask(d,u,v)>.35)return
       const cell=`${Math.round(x/T.crownRadius)},${Math.round(z/T.crownRadius)}`
@@ -57,13 +63,22 @@ export function Trees() {
       const m=new THREE.Matrix4().compose(new THREE.Vector3(x,terrainY(d,x,z),z),new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),rand()*Math.PI*2),new THREE.Vector3(scale,scale,scale))
       ;(willow?willows:forest).push(m)
     }
+    // 阶段 10：苏堤、白堤的柳树沿加宽后的堤沿种两排，遇桥空出
+    const CW=style.causeways
+    for(const cw of causeways)for(let t=0;t<cw.length;t+=T.dikeSpacing){
+      if(inBridge(cw,t,2))continue
+      const p=pointAt(cw,t),off=CW.halfWidth-CW.willowInset
+      for(const side of [-1,1])add(p.x-p.tz*off*side,p.z+p.tx*off*side,true)
+    }
     for(const ring of d.green.dikes){
       const pts=ring.map(([a,b])=>lngLatToScene(a,b))
       for(let i=1;i<pts.length;i++){
         const [a,b]=[pts[i-1],pts[i]],len=Math.hypot(b[0]-a[0],b[1]-a[1])
         for(let t=0;t<len;t+=T.dikeSpacing){
           const nx=-(b[1]-a[1])/len*T.shoreOffset,nz=(b[0]-a[0])/len*T.shoreOffset
-          for(const side of [-1,1])add(a[0]+(b[0]-a[0])*t/len+nx*side,a[1]+(b[1]-a[1])*t/len+nz*side,true)
+          const px=a[0]+(b[0]-a[0])*t/len,pz=a[1]+(b[1]-a[1])*t/len
+          if(nearCauseway(px,pz).d<style.causeways.halfWidth+3)continue // 苏堤、白堤改用上面的两排
+          for(const side of [-1,1])add(px+nx*side,pz+nz*side,true)
         }
       }
     }
