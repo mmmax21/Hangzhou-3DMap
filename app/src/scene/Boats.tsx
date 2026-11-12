@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { style } from '../config/style'
 import { lngLatToScene, sceneToUV } from '../geo/geo'
-import { sampleMask, useSceneData } from '../data/loaders'
+import { sampleMask, useSceneData, type SceneData } from '../data/loaders'
 import { lerpColor, shared, uNight } from '../state/night'
 import { OCT } from './terrainHeight'
 
@@ -17,15 +17,18 @@ function lightsOn(x: number, seed: number) {
   return t * t * (3 - 2 * t)
 }
 
-/** 湖上的画舫：沿水面上的圆形航线缓慢行驶，夜晚船舱亮灯 */
-export function Boats() {
-  const d = useSceneData()
-  const routes = useMemo(() => {
+export type BoatRoute = { cx: number; cz: number; r: number; phase: number; dir: number; seed: number }
+const routeCache = new WeakMap<SceneData, BoatRoute[]>()
+/** 游船的圆形航线（确定性随机，荷花铺设也用它来避开航线） */
+export function boatRoutes(d: SceneData): BoatRoute[] {
+  const hit = routeCache.get(d)
+  if (hit) return hit
+  const out = (() => {
     const [lx, lz] = lngLatToScene(120.143, 30.244)
     let s = 4421
     const rand = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296 }
     const open = (x: number, z: number) => { const [u, v] = sceneToUV(x, z); return sampleMask(d, u, v) > 0.5 && sampleMask(d, u, v, 1) > K.shoreClear }
-    const out: { cx: number; cz: number; r: number; phase: number; dir: number; seed: number }[] = []
+    const out: BoatRoute[] = []
     for (let tries = 0; tries < 600 && out.length < K.count; tries++) {
       const a = rand() * Math.PI * 2, rr = Math.sqrt(rand()) * K.spread
       const cx = lx + Math.cos(a) * rr, cz = lz + Math.sin(a) * rr, r = K.minRadius + rand() * (K.maxRadius - K.minRadius)
@@ -34,7 +37,15 @@ export function Boats() {
       if (ok && !out.some(o => Math.hypot(o.cx - cx, o.cz - cz) < o.r + r + 8)) out.push({ cx, cz, r, phase: rand() * Math.PI * 2, dir: rand() > 0.5 ? 1 : -1, seed: rand() })
     }
     return out
-  }, [d])
+  })()
+  routeCache.set(d, out)
+  return out
+}
+
+/** 湖上的画舫：沿水面上的圆形航线缓慢行驶，夜晚船舱亮灯 */
+export function Boats() {
+  const d = useSceneData()
+  const routes = useMemo(() => boatRoutes(d), [d])
   const mats = useMemo(() => ({
     hull: new THREE.MeshStandardMaterial({ roughness: 0.9 }),
     cabin: new THREE.MeshStandardMaterial({ roughness: 0.85 }),

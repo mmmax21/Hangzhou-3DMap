@@ -283,6 +283,30 @@ export const style = {
     contactKeep: 0.45, // 有真实投影时接触阴影保留的比例；第 2 档没有投影，接触阴影保持原样
   },
 
+  // 阶段 8：曲院风荷的荷叶与荷花，见 scene/Lotus.tsx
+  lotus: {
+    radius: 72, // 以曲院风荷为中心的铺设半径（场景单位）
+    center: [0, 0] as [number, number], // 相对景点坐标的偏移
+    spacing: 2.1, // 候选点网格间距
+    density: 1, // 候选点保留概率（边缘按距离再衰减）
+    clusterScale: 0.075, // 成片分布的噪声频率，越小片越大
+    clusterCut: 0.24, // 噪声低于这个值的地方留出水面
+    shoreMin: 0.008, shoreMax: 0.34, // 只铺在离岸这段距离内（watermask G 通道单位）
+    modelClear: 11, // 离水榭模型的最小距离
+    boatClear: 9, // 离游船航线的最小距离
+    leafSize: [1.4, 2.6] as [number, number], // 荷叶半径范围
+    leafLift: [0.12, 0.9] as [number, number], // 荷叶离水面高度范围（少数立叶高出水面）
+    standRatio: 0.18, // 立叶（高出水面、略倾斜）的比例
+    flowerRatio: 0.1, // 荷花数量相对荷叶的比例
+    flowerSize: 1.0, flowerLift: 1.3,
+    sway: 0.06, swaySpeed: 0.7, // 起伏动画
+    leaf: { day: '#4E8C5C', night: '#14241A' },
+    leafEdge: { day: '#86B86C', night: '#1D3022' },
+    flower: { day: '#F29BB0', night: '#3A2230' },
+    flowerCore: { day: '#FFE7A8', night: '#4A3C22' },
+    lowFraction: 0.35, // 第 2 档只保留这么多
+  },
+
   render: {
     maxDpr: 1.5, // PRD 允许最高 2；骨架阶段取 1.5 保帧率，画质分档阶段再按设备调
     msaa: 4,
