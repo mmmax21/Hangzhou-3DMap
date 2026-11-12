@@ -280,6 +280,52 @@ export const style = {
     cameraFrom: [60, 820, 230] as [number, number, number], cameraStart: .9, cameraDuration: 5.2,
   },
 
+  // 阶段 8：日光投影，见 scene/Shadows.tsx。主光方向沿用 lighting.sunDir（shared.uSunDir）
+  shadows: {
+    // 物体（景点、树、建筑）投到地面和建筑上的影子强度：0 无影，1 完全挡住主光
+    strength: { day: 0.62, night: 0.04 } as DN<number>,
+    // 山体投影与背光面（按主光方向在高度图上步进求遮蔽）的强度
+    terrainStrength: { day: 0.48, night: 0.04 } as DN<number>,
+    tint: '#6F8FA0', // 影子里偏一点石青，避免发灰发黑
+    tintAmount: 0.22,
+    mapSize: 2048, // 阴影贴图边长，覆盖整个沙盘约 0.45 单位一个像素
+    radius: 3, // three 自带 PCF 的模糊半径（景点、树受影）
+    bias: -0.0006, normalBias: 0.35,
+    maskSize: 1536, // 地面阴影遮罩边长：只在主光方向变化时重算，地形每像素只取样一次
+    maskSoft: 1.6, // 地面遮罩 PCF 的取样间距（阴影贴图像素），越大越柔
+    maskBias: 1.2, // 地面遮罩比较深度的偏移（场景单位），地面不投影，只用来避免网格与高度图的微小差异
+    occSteps: 40, occDistance: 260, // 山体遮蔽的步进次数和最远距离（场景单位）
+    occSoft: 3.5, // 山体遮蔽的柔和度，越小半影越宽
+    casterTop: 200, // 投影者的最高高度（场景单位），用于拟合阴影相机
+    minAngle: 0.003, // 主光方向变化超过这个弧度才重算
+    interval: 0.2, // 主光方向持续变化时（昼夜过渡）两次重算的最短间隔（秒）
+    contactKeep: 0.45, // 有真实投影时接触阴影保留的比例；第 2 档没有投影，接触阴影保持原样
+  },
+
+  // 阶段 8：曲院风荷的荷叶与荷花，见 scene/Lotus.tsx
+  lotus: {
+    radius: 72, // 以曲院风荷为中心的铺设半径（场景单位）
+    center: [0, 0] as [number, number], // 相对景点坐标的偏移
+    spacing: 2.1, // 候选点网格间距
+    density: 1, // 候选点保留概率（边缘按距离再衰减）
+    clusterScale: 0.075, // 成片分布的噪声频率，越小片越大
+    clusterCut: 0.24, // 噪声低于这个值的地方留出水面
+    shoreMin: 0.008, shoreMax: 0.34, // 只铺在离岸这段距离内（watermask G 通道单位）
+    modelClear: 11, // 离水榭模型的最小距离
+    boatClear: 9, // 离游船航线的最小距离
+    leafSize: [1.4, 2.6] as [number, number], // 荷叶半径范围
+    leafLift: [0.12, 0.9] as [number, number], // 荷叶离水面高度范围（少数立叶高出水面）
+    standRatio: 0.18, // 立叶（高出水面、略倾斜）的比例
+    flowerRatio: 0.1, // 荷花数量相对荷叶的比例
+    flowerSize: 1.0, flowerLift: 1.3,
+    sway: 0.06, swaySpeed: 0.7, // 起伏动画
+    leaf: { day: '#4E8C5C', night: '#14241A' },
+    leafEdge: { day: '#86B86C', night: '#1D3022' },
+    flower: { day: '#F29BB0', night: '#3A2230' },
+    flowerCore: { day: '#FFE7A8', night: '#4A3C22' },
+    lowFraction: 0.35, // 第 2 档只保留这么多
+  },
+
   render: {
     maxDpr: 1.5, // PRD 允许最高 2；骨架阶段取 1.5 保帧率，画质分档阶段再按设备调
     msaa: 4,

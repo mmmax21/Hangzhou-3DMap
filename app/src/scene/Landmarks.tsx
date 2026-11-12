@@ -8,6 +8,8 @@ import { landmarks, useSceneData, type Landmark } from '../data/loaders'
 import { lerpColor, uNight } from '../state/night'
 import { useSelection } from '../state/selection'
 import { OCT, terrainY } from './terrainHeight'
+import { injectTerrainShade, requestShadowUpdate } from '../state/shadows'
+import { usePerfTier } from '../state/perf'
 declare const __MODEL_FILES__: string[]
 const L = style.landmarks
 /** 与 GLSL 的 lightsOn 一致：越靠东越早亮 */
@@ -33,6 +35,7 @@ function Model({ file, size=L.modelSize, x=0 }: { file: string; size?:number; x?
   const gltf = useGLTF(`${import.meta.env.BASE_URL}models/${file}`)
   const model = useMemo(() => {
     const clone = gltf.scene.clone(true)
+    clone.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.castShadow = obj.receiveShadow = true } }) // 阶段 8 投影
     clone.traverse(obj => { if (obj instanceof THREE.Mesh) obj.material = Array.isArray(obj.material) ? obj.material.map(m => m.clone()) : obj.material.clone() })
     clone.traverse(obj=>{if(obj instanceof THREE.Mesh)for(const mat of (Array.isArray(obj.material)?obj.material:[obj.material]))if(mat instanceof THREE.MeshStandardMaterial){
       mat.roughness=L.modelRoughness;mat.metalness=0;mat.metalnessMap=null;mat.roughnessMap=null;mat.emissiveMap=mat.map
@@ -40,6 +43,7 @@ function Model({ file, size=L.modelSize, x=0 }: { file: string; size?:number; x?
         shader.uniforms.uModelSaturation={value:L.modelSaturation}
         shader.uniforms.uModelGain={value:L.modelGain}
         shader.fragmentShader='uniform float uModelSaturation;\nuniform float uModelGain;\n'+shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n diffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.2126,0.7152,0.0722))), diffuseColor.rgb, uModelSaturation) * uModelGain;')
+        injectTerrainShade(shader)
       }
       mat.customProgramCacheKey=()=> 'landmark-grade'
     }})
@@ -49,6 +53,7 @@ function Model({ file, size=L.modelSize, x=0 }: { file: string; size?:number; x?
     clone.scale.setScalar(scale)
     return clone
   }, [gltf,size])
+  useEffect(()=>{requestShadowUpdate()},[model]) // 模型加载完成后重画阴影
   useEffect(()=>()=>model.traverse(obj=>{if(obj instanceof THREE.Mesh)(Array.isArray(obj.material)?obj.material:[obj.material]).forEach(m=>m.dispose())}),[model])
   useFrame(() => model.traverse(obj => {
     if (obj instanceof THREE.Mesh) for (const mat of (Array.isArray(obj.material) ? obj.material : [obj.material])) {
@@ -67,7 +72,10 @@ function Marker({ item, position, material }: { item: Landmark; position: [numbe
   const file=item.id==='sudi'?'duanqiao.glb':item.model
   const placeholder = item.model ? <mesh position={[0, sy / 2, 0]} material={material}><boxGeometry args={[sx, sy, sz]} /></mesh> : <mesh position={[0, L.markerHeight/2, 0]} material={material}><cylinderGeometry args={[L.markerRadius, L.markerRadius, L.markerHeight, L.markerSegments]} /></mesh>
   const shadowR=(L.sizes[item.id]??sy)*L.shadowScale
-  return <group position={position}>{item.model&&<mesh rotation-x={-Math.PI/2} position={[L.shadowOffset[0]*shadowR,.5,L.shadowOffset[1]*shadowR]} renderOrder={1}><circleGeometry args={[shadowR,24]}/><meshBasicMaterial map={contactShadow()} color="#000" transparent opacity={L.shadowOpacity} depthWrite={false} polygonOffset polygonOffsetFactor={-4}/></mesh>}<group ref={group}
+  // 阶段 8：有真实投影时接触阴影减弱，只留脚下一点压实感；第 2 档没有投影，保持原样
+  const tier=usePerfTier(s=>s.tier)
+  const contactOpacity=L.shadowOpacity*(tier<2?style.shadows.contactKeep:1)
+  return <group position={position}>{item.model&&<mesh rotation-x={-Math.PI/2} position={[L.shadowOffset[0]*shadowR,.5,L.shadowOffset[1]*shadowR]} renderOrder={1}><circleGeometry args={[shadowR,24]}/><meshBasicMaterial map={contactShadow()} color="#000" transparent opacity={contactOpacity} depthWrite={false} polygonOffset polygonOffsetFactor={-4}/></mesh>}<group ref={group}
     onPointerOver={e => { e.stopPropagation(); setHover(true); document.body.style.cursor = 'pointer' }}
     onPointerOut={() => { setHover(false); document.body.style.cursor = '' }}
     onClick={e => { e.stopPropagation(); if(e.delta<L.clickMaxDrag)select(item) }}>

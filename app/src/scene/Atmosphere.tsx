@@ -36,7 +36,7 @@ export function Atmosphere() {
   return (
     <>
       <hemisphereLight ref={hemi} />
-      <directionalLight ref={dir} />
+      <directionalLight ref={dir} name="sun" /* 阶段 8：Shadows.tsx 按名字找到它并开启投影 */ />
       <Moon />
     </>
   )

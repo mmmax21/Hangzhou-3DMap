@@ -5,6 +5,7 @@ import { lngLatToScene, metersToUnits, sceneToUV } from '../geo/geo'
 import { landmarks, sampleMask, useSceneData } from '../data/loaders'
 import { colorPair, shared } from '../state/night'
 import { glslCommon } from '../shaders/common'
+import { glslShadow, shadowUniforms } from '../state/shadows'
 import { octSDF, terrainY } from './terrainHeight'
 
 const B = style.buildings
@@ -31,6 +32,7 @@ void main() {
 
 const frag = /* glsl */ `
 ${glslCommon}
+${glslShadow}
 uniform vec3 cWall[2]; uniform vec3 cRoof[2]; uniform vec3 cTower[2]; uniform vec3 cLight[2]; uniform vec3 cSun[2];
 uniform float pSunI[2]; uniform float pAmb[2];
 varying vec3 vPos;
@@ -48,8 +50,11 @@ void main() {
   vec3 col = mix(wall, DNC(cRoof), isRoof);
   // 光照（很淡的明暗）
   float ndl = dot(n, normalize(uSunDir));
-  float lit = DNF(pAmb) + DNF(pSunI) * clamp(ndl * 0.6 + 0.4, 0.0, 1.0);
+  // 阶段 8 投影：主光被别的物体或山体挡住的部分
+  float shade = clamp(objectShade(vPos, n) + terrainShade(vPos.xz), 0.0, 1.0);
+  float lit = DNF(pAmb) + DNF(pSunI) * clamp(ndl * 0.6 + 0.4, 0.0, 1.0) * (1.0 - shade);
   col *= mix(lit, 1.0, tower * 0.35);
+  col *= shadeTint(shade);
   // 墙脚略暗，增加体积感
   col *= mix(0.86, 1.0, smoothstep(0.0, 6.0, vLocalY)) * (1.0 - isRoof) + isRoof;
 
@@ -167,6 +172,7 @@ export function Buildings() {
         side: THREE.DoubleSide,
         uniforms: {
           ...shared,
+          ...shadowUniforms,
           cWall: colorPair(C.wall),
           cRoof: colorPair(C.roof),
           cTower: colorPair(C.tower),
@@ -179,5 +185,5 @@ export function Buildings() {
     [],
   )
 
-  return <mesh geometry={geometry} material={material} />
+  return <mesh geometry={geometry} material={material} castShadow />
 }

@@ -8,6 +8,7 @@ import { landmarks, sampleMask, useSceneData } from '../data/loaders'
 import { lngLatToScene, sceneToUV, TERRAIN_D, TERRAIN_W } from '../geo/geo'
 import { lerpColor, uNight } from '../state/night'
 import { octSDF, terrainY } from './terrainHeight'
+import { injectTerrainShade } from '../state/shadows'
 const T = style.trees
 function inside(x:number,z:number,r:number[][]) {
   let hit=false
@@ -86,14 +87,19 @@ export function Trees() {
     const make=(geometry:THREE.BufferGeometry,matrices:THREE.Matrix4[],shade?:[number,number])=>{
       const material=new THREE.MeshStandardMaterial({roughness:1})
       // 树冠下暗上亮，给一点体积感
-      if(shade)material.onBeforeCompile=s=>{
-        s.vertexShader='varying float vCrownY;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n vCrownY = position.y;')
-        s.fragmentShader='varying float vCrownY;\n'+s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\n diffuseColor.rgb *= mix(${T.shadeLow.toFixed(2)}, ${T.shadeHigh.toFixed(2)}, smoothstep(${shade[0].toFixed(2)}, ${shade[1].toFixed(2)}, vCrownY));`)
+      material.onBeforeCompile=s=>{
+        if(shade){
+          s.vertexShader='varying float vCrownY;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n vCrownY = position.y;')
+          s.fragmentShader='varying float vCrownY;\n'+s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\n diffuseColor.rgb *= mix(${T.shadeLow.toFixed(2)}, ${T.shadeHigh.toFixed(2)}, smoothstep(${shade[0].toFixed(2)}, ${shade[1].toFixed(2)}, vCrownY));`)
+        }
+        injectTerrainShade(s) // 阶段 8：站在山影里的树变暗
       }
+      // 三种树的 onBeforeCompile 源码相同，按种类区分程序缓存，避免共用同一个着色器
+      material.customProgramCacheKey=()=>'tree-'+(shade?shade.map(v=>v.toFixed(2)).join(','):'trunk')
       const mesh=new THREE.InstancedMesh(geometry,material,matrices.length)
       const tint=new THREE.Color()
       matrices.forEach((m,i)=>{mesh.setMatrixAt(i,m);const f=Math.sin(i*12.9898)*43758.5453,k=1+(f-Math.floor(f)-.5)*2*T.tint;mesh.setColorAt(i,tint.setRGB(k,k,k))})
-      mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;mesh.computeBoundingSphere();return mesh
+      mesh.castShadow=true;mesh.receiveShadow=!!shade;mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;mesh.computeBoundingSphere();return mesh
     }
     const trunks=new THREE.CylinderGeometry(T.crownRadius*.1,T.crownRadius*.14,T.trunkHeight,5).translate(0,T.trunkHeight/2,0)
     console.info(`[trees] forest=${forest.length}, willows=${willows.length}; 3 instanced draws`)

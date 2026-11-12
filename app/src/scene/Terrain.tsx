@@ -6,6 +6,7 @@ import { TERRAIN_D, TERRAIN_W } from '../geo/geo'
 import { useSceneData } from '../data/loaders'
 import { colorPair, numPair, shared } from '../state/night'
 import { glslCommon } from '../shaders/common'
+import { glslShadow, shadowUniforms } from '../state/shadows'
 import { octSDF, terrainY } from './terrainHeight'
 
 const T = style.terrain
@@ -21,6 +22,7 @@ void main() {
 
 const frag = /* glsl */ `
 ${glslCommon}
+${glslShadow}
 uniform sampler2D uHeight;
 uniform sampler2D uMask;
 uniform vec2 uSize;      // 场景宽、深
@@ -93,7 +95,11 @@ void main() {
   // 光照：柔和包裹光
   float ndl = dot(n, normalize(uSunDir));
   float wrap = clamp(ndl * 0.6 + 0.4, 0.0, 1.0);
-  col *= DNF(pAmb) + DNF(pSunI) * wrap * DNC(cSun);
+  // ---- 阶段 8 投影：开始。地面遮罩里有物体投影（R）和山体投影/背光面（G），只挡主光，环境光不变 ----
+  float shade = groundShade(vPos.xz);
+  col *= DNF(pAmb) + DNF(pSunI) * wrap * DNC(cSun) * (1.0 - shade);
+  col *= shadeTint(shade);
+  // ---- 阶段 8 投影：结束 ----
 
   // 山脊金线：采样管线烘焙的山脊距离场（R = 距离/16 像素，G = 山脊强度），按屏幕像素定线宽
   vec4 rg = texture2D(uRidge, uv);
@@ -162,6 +168,7 @@ export function Terrain() {
         fragmentShader: frag,
         uniforms: {
           ...shared,
+          ...shadowUniforms, // 阶段 8 投影
           uHeight: { value: d.heightTex },
           uMask: { value: d.maskTex },
           uSize: { value: new THREE.Vector2(TERRAIN_W, TERRAIN_D) },
